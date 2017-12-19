@@ -72,7 +72,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex;..\..\DirectXTK\Inc;..</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex;..\..\DirectXTK\Inc;..</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
