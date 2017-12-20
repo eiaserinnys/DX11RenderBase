@@ -118,6 +118,16 @@ namespace DirectX
 	}
 
 	//------------------------------------------------------------------------------
+	inline XMFLOAT3 Cross(const XMFLOAT3& a, const XMFLOAT3& b)
+	{
+		XMFLOAT3 v;
+		v.x = a.y * b.z - a.z * b.y;
+		v.y = a.z * b.x - a.x * b.z;
+		v.z = a.x * b.y - a.y * b.x;
+		return v;
+	}
+
+	//------------------------------------------------------------------------------
 	inline XMFLOAT3 Normalize(const XMFLOAT3& a)
 	{
 		return a / sqrtf(Dot(a, a));

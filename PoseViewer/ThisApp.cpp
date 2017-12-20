@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ThisApp.h"
 
 #include <DirectXMath.h>
@@ -44,7 +44,7 @@ public:
 
 	void Load()
 	{
-		// VMD�� �ε��غ���
+		// VMD를 로드해본다
 		std::ifstream is;
 		is.open("Vmd/Happy Hands Meme.vmd", std::ios::in | std::ios::binary);
 
@@ -52,6 +52,17 @@ public:
 		if (is.is_open())
 		{
 			vmdMotion = vmd::VmdMotion::LoadFromStream(&is);
+		}
+
+		for (auto frame : vmdMotion->bone_frames)
+		{
+			WindowsUtility::Debug(
+				L"%d %s %f,%f,%f\n", 
+				frame.frame,
+				frame.wname.c_str(),
+				frame.position[0], 
+				frame.position[1],
+				frame.position[2]);
 		}
 
 		com = XMFLOAT3(0, 0, 0);
@@ -91,6 +102,102 @@ public:
 		}
 
 		com = com / (float) frames.size();
+
+		// 일단 막 vmd를 만들어보자
+		unique_ptr<vmd::VmdMotion> vmdMotionOut;
+		{
+			vmdMotionOut.reset(new vmd::VmdMotion);
+
+			vmdMotionOut->model_name = vmd::utf82sjis(L"初音ミク");
+			vmdMotionOut->version = 2;
+
+			int fi =  0;
+			for (auto f : frames)
+			{
+				AddFrame(vmdMotion.get(), vmdMotionOut.get(), f, fi);
+				++fi;
+			}
+		}
+
+		vmdMotionOut->SaveToFile(
+			L"D:\\__Development__\\MikuMikuDanceE_v931x64\\UserFile\\Motion\\RedFlavor.vmd");
+	}
+
+	XMMATRIX GetPose(
+		OpenPose::Frame& f,
+		int pivot,
+		int next,
+		int ref)
+	{
+		XMFLOAT3 front = f.pos[next] - f.pos[pivot];
+		XMFLOAT3 left = f.pos[ref] - f.pos[pivot];
+		XMFLOAT3 up = Cross(front, left);
+
+		XMMATRIX bone;
+		if (Length(front) == 0 || Length(left) == 0 || Length(up) == 0)
+		{
+			bone = XMMatrixIdentity();
+		}
+		else
+		{
+			bone = XMMatrixLookAtLH(
+				XMLoadFloat3(&f.pos[pivot]),
+				XMLoadFloat3(&f.pos[next]),
+				XMLoadFloat3(&up));
+		}
+
+		return bone;
+	}
+
+	XMMATRIX AddBone(
+		vmd::VmdMotion* vmdMotion,
+		vmd::VmdMotion* vmdMotionOut,
+		OpenPose::Frame& f,
+		int fi, 
+		const wstring& name,
+		int pivot, 
+		int next, 
+		int ref, 
+		const XMMATRIX& parent)
+	{
+		vmd::VmdBoneFrame vf;
+		vf.name = vmd::utf82sjis(name);
+		vf.frame = fi;
+		vf.position[0] = 0;
+		vf.position[1] = 0;
+		vf.position[2] = 0;
+
+		XMMATRIX bone = GetPose(f, pivot, next, ref);
+
+		XMMATRIX invPar = XMMatrixInverse(nullptr, parent);
+		auto local = XMMatrixMultiply(invPar, bone);
+
+		XMVECTOR quat = XMQuaternionRotationMatrix(local);
+
+		vf.orientation[0] = quat.m128_f32[0];
+		vf.orientation[1] = quat.m128_f32[1];
+		vf.orientation[2] = quat.m128_f32[2];
+		vf.orientation[3] = quat.m128_f32[3];
+
+		memcpy(
+			vf.interpolation,
+			&vmdMotion->bone_frames[0].interpolation,
+			sizeof(char) * 4 * 4 * 4);
+
+		vmdMotionOut->bone_frames.push_back(vf);
+
+		return bone;
+	}
+
+	void AddFrame(
+		vmd::VmdMotion* vmdMotion,
+		vmd::VmdMotion* vmdMotionOut,
+		OpenPose::Frame& f,
+		int fi)
+	{
+		XMMATRIX base = GetPose(f, 1, 8, 11);
+		XMMATRIX rs = AddBone(vmdMotion, vmdMotionOut, f, fi, L"右肩", 2, 3, 1, base);
+		AddBone(vmdMotion, vmdMotionOut, f, fi, L"右ひじ", 3, 4, 1, rs);
 	}
 
 	~ThisApp()

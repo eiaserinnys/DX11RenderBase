@@ -12,8 +12,6 @@ namespace vmd
 	//VC++ SJIS string を utf-8のstringに変換する
 	static std::wstring sjis2utf8(const std::string& sjis)
 	{
-		std::string utf8_string;
-
 		//一旦SJISからutf-16へ変換
 		LPCCH pSJIS = (LPCCH)sjis.c_str();
 		int utf16size = ::MultiByteToWideChar(
@@ -29,6 +27,26 @@ namespace vmd
 			}
 		}
 		return std::wstring();
+	}
+
+	static std::string utf82sjis(const std::wstring& utf16)
+	{
+		std::string utf8_string;
+
+		const wchar_t* pUtf16 = utf16.c_str();
+		int sjisSize = ::WideCharToMultiByte(
+			932, 0, pUtf16, -1, 0, 0, NULL, NULL);
+		if (sjisSize != 0)
+		{
+			std::vector<char> sjis;
+			sjis.resize(sjisSize);
+			if (::WideCharToMultiByte(
+				932, 0, pUtf16, -1, &sjis[0], sjisSize, NULL, FALSE) != 0)
+			{
+				return std::string(&sjis[0]);
+			}
+		}
+		return std::string();
 	}
 
 	/// ボーンフレーム
