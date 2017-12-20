@@ -7,6 +7,8 @@
 
 #include <DirectXMath.h>
 
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+
 struct Utility
 {
 	static inline std::string Format(const char* format, ...)

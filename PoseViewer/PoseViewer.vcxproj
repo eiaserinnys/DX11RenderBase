@@ -120,8 +120,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="OpenPose.cpp" />
+    <ClCompile Include="OpenPoseRenderer.cpp" />
     <ClCompile Include="ThisApp.cpp" />
-    <ClCompile Include="Global.cpp" />
+    <ClCompile Include="RenderContext.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -131,8 +132,9 @@
     <ClCompile Include="SceneDescriptor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Global.h" />
+    <ClInclude Include="RenderContext.h" />
     <ClInclude Include="OpenPose.h" />
+    <ClInclude Include="OpenPoseRenderer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SceneDescriptor.h" />

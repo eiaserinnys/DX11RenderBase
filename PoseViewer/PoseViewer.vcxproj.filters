@@ -23,9 +23,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>헤더 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Global.cpp">
-      <Filter>소스 파일\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render.cpp">
       <Filter>소스 파일\Render</Filter>
     </ClCompile>
@@ -41,13 +38,16 @@
     <ClCompile Include="OpenPose.cpp">
       <Filter>소스 파일\ThisApp</Filter>
     </ClCompile>
+    <ClCompile Include="OpenPoseRenderer.cpp">
+      <Filter>소스 파일\ThisApp</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderContext.cpp">
+      <Filter>소스 파일\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>소스 파일\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render.h">
       <Filter>소스 파일\Render</Filter>
@@ -60,6 +60,12 @@
     </ClInclude>
     <ClInclude Include="OpenPose.h">
       <Filter>소스 파일\ThisApp</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenPoseRenderer.h">
+      <Filter>소스 파일\ThisApp</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderContext.h">
+      <Filter>소스 파일\Render</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

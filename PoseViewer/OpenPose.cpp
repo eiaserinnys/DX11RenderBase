@@ -92,9 +92,11 @@ public:
 
 			for (Value::ConstValueIterator k = pose.Begin(); k != pose.End(); )
 			{
-				frame.pos[offset].x = k->GetFloat(); k++;
-				frame.pos[offset].y = k->GetFloat(); k++;
-				frame.pos[offset].z = k->GetFloat(); k++;
+				float scale = 1000.0f;
+
+				frame.pos[offset].x = k->GetFloat() / scale; k++;
+				frame.pos[offset].z = - k->GetFloat() / scale; k++;
+				frame.pos[offset].y = k->GetFloat() / scale; k++;
 
 				total = total + frame.pos[offset];
 

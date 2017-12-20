@@ -4,7 +4,7 @@
 
 #include <DirectXTex.h>
 
-#include "Global.h"
+#include "RenderContext.h"
 #include "Render.h"
 
 using namespace std;

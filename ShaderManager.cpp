@@ -111,6 +111,11 @@ public:
 			device->immDevCtx->VSSetShader(NULL, NULL, 0);
 		}
 	}
+
+	virtual DX11VertexShader* Find(const std::wstring& pathName)
+	{
+		return ParentType::Find(pathName);
+	}
 };
 
 IVertexShaderManager::~IVertexShaderManager()
@@ -118,3 +123,32 @@ IVertexShaderManager::~IVertexShaderManager()
 
 IVertexShaderManager* IVertexShaderManager::Create(DX11Device* device)
 { return new VertexShaderManager(device); }
+
+//------------------------------------------------------------------------------
+class PixelShaderManager :
+	public ShaderManagerT<IPixelShaderManager, DX11PixelShader> {
+public:
+	typedef ShaderManagerT<IPixelShaderManager, DX11PixelShader> ParentType;
+
+	PixelShaderManager(DX11Device* device) : ParentType(device) {}
+
+	void Set(const wstring& pathName)
+	{
+		auto found = Find(pathName);
+
+		if (found != nullptr)
+		{
+			device->immDevCtx->PSSetShader(found->ps, NULL, 0);
+		}
+		else
+		{
+			device->immDevCtx->PSSetShader(NULL, NULL, 0);
+		}
+	}
+};
+
+IPixelShaderManager::~IPixelShaderManager()
+{}
+
+IPixelShaderManager* IPixelShaderManager::Create(DX11Device* device)
+{ return new PixelShaderManager(device); }
