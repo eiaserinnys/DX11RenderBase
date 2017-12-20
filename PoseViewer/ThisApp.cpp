@@ -12,6 +12,8 @@
 #include "OpenPose.h"
 #include "OpenPoseRenderer.h"
 
+#include "Vmd.h"
+
 using namespace std;
 using namespace DirectX;
 
@@ -25,7 +27,8 @@ public:
 	vector<OpenPose::Frame> frames;
 	int cur = 0;
 
-	int lastTime = 0;
+	bool advance = false;
+	int pivotTime = 0;
 
 	XMFLOAT3 com;
 
@@ -36,13 +39,21 @@ public:
 		render.reset(new DX11Render(hWnd, global->d3d11.get()));
 		openPoseRender.reset(IOpenPoseRenderer::Create(global.get()));
 
-		lastTime = timeGetTime();
-
 		Load();
 	}
 
 	void Load()
 	{
+		// VMD를 로드해본다
+		std::ifstream is;
+		is.open("Vmd/Happy Hands Meme.vmd", std::ios::in | std::ios::binary);
+
+		unique_ptr<vmd::VmdMotion> vmdMotion;
+		if (is.is_open())
+		{
+			vmdMotion = vmd::VmdMotion::LoadFromStream(&is);
+		}
+
 		com = XMFLOAT3(0, 0, 0);
 
 		for (int i = 0; ; ++i)
@@ -56,6 +67,17 @@ public:
 				OpenPose::Frame frame;
 
 				OpenPose::Load(fileName, frame);
+
+				for (int i = 0; i < COUNT_OF(frame.pos); ++i)
+				{
+					if (frame.pos[i].x == 0 &&
+						frame.pos[i].y == 0 &&
+						frame.pos[i].z == 0)
+					{
+						const auto& last = *frames.rbegin();
+						frame.pos[i] = last.pos[i];
+					}
+				}
 
 				frames.push_back(frame);
 
@@ -94,12 +116,17 @@ public:
 
 		openPoseRender->Render(frames[cur], sceneDesc);
 
-		if (timeGetTime() - lastTime > 30)
+		if (advance)
 		{
-			lastTime = timeGetTime();
+			if (pivotTime == 0)
+			{
+				pivotTime = timeGetTime();
+			}
 
-			cur++;
-			if (cur >= frames.size()) { cur = 0; }
+			int totalAdvance = timeGetTime() - pivotTime;
+
+			cur = (int)(totalAdvance / 1000.0f * 30);
+			cur = cur % frames.size();
 		}
 
 		render->End();
@@ -117,6 +144,10 @@ public:
 			{
 				MessageBox(hWnd, L"Reload Error", L"Reload Error", MB_OK);
 			}
+		}
+		if (wParam == VK_F1)
+		{
+			advance = !advance;
 		}
 	}
 };

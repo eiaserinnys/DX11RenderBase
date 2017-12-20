@@ -49,6 +49,8 @@ struct OpenPoseEffectConstants
 //------------------------------------------------------------------------------
 class OpenPoseRenderer : public IOpenPoseRenderer {
 public:
+	int primitiveCount;
+
 	//--------------------------------------------------------------------------
 	OpenPoseRenderer(RenderContext* context)
 		: context(context)
@@ -98,6 +100,41 @@ public:
 			context->d3d11->g_pd3dDevice,
 			sizeof(XMFLOAT3),
 			100 * sizeof(XMFLOAT3)));
+
+		// https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
+		UINT16 indData[] = 
+		{
+			0, 1, 
+
+			1, 2,
+			2, 3, 
+			3, 4,
+
+			1, 5,
+			5, 6, 
+			6, 7,
+
+			1, 8,
+			8, 9,
+			9, 10, 
+
+			1, 11,
+			11, 12, 
+			12, 13,
+
+			0, 14,
+			0, 15,
+			14, 16,
+			15, 17,
+		};
+
+		primitiveCount = COUNT_OF(indData) / 2;
+
+		ind.reset(IDX11Buffer::Create_DefaultIB(
+			context->d3d11->g_pd3dDevice,
+			sizeof(UINT16),
+			COUNT_OF(indData),
+			indData));
 	}
 
 	//--------------------------------------------------------------------------
@@ -128,8 +165,10 @@ public:
 		context->ps->Set(fxFileName);
 
 		pos->ApplyVB(context->d3d11->immDevCtx, 0, 0);
-		context->d3d11->immDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-		context->d3d11->immDevCtx->Draw(COUNT_OF(frame.pos), 0);
+		ind->ApplyIB(context->d3d11->immDevCtx, 0);
+		context->d3d11->immDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+		context->d3d11->immDevCtx->DrawIndexed(primitiveCount * 2, 0, 0);
 	}
 
 	//--------------------------------------------------------------------------
@@ -138,6 +177,7 @@ public:
 	const wchar_t* fxFileName = L"Shaders/OpenPose.fx";
 
 	unique_ptr<IDX11Buffer> pos;
+	unique_ptr<IDX11Buffer> ind;
 
 	unique_ptr<OpenPoseEffectConstants> constants;
 

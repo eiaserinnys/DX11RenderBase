@@ -139,6 +139,7 @@
     <ClInclude Include="Render.h" />
     <ClInclude Include="SceneDescriptor.h" />
     <ClInclude Include="ThisApp.h" />
+    <ClInclude Include="Vmd.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DirectXTex\DirectXTex\DirectXTex_Desktop_2015.vcxproj">

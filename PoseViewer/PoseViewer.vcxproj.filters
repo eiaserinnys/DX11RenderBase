@@ -18,6 +18,12 @@
     <Filter Include="소스 파일\ThisApp">
       <UniqueIdentifier>{354c1c1e-73c0-415b-aa4b-af0fe7516323}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\ThisApp\OpenPose">
+      <UniqueIdentifier>{e96c2e9c-e266-4ad8-ac51-32b75ada36e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\ThisApp\VMD">
+      <UniqueIdentifier>{c0e0076e-56e5-4b40-bddc-23761288b4ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -35,14 +41,14 @@
     <ClCompile Include="ThisApp.cpp">
       <Filter>소스 파일\ThisApp</Filter>
     </ClCompile>
-    <ClCompile Include="OpenPose.cpp">
-      <Filter>소스 파일\ThisApp</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenPoseRenderer.cpp">
-      <Filter>소스 파일\ThisApp</Filter>
-    </ClCompile>
     <ClCompile Include="RenderContext.cpp">
       <Filter>소스 파일\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenPose.cpp">
+      <Filter>소스 파일\ThisApp\OpenPose</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenPoseRenderer.cpp">
+      <Filter>소스 파일\ThisApp\OpenPose</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,14 +64,17 @@
     <ClInclude Include="ThisApp.h">
       <Filter>소스 파일\ThisApp</Filter>
     </ClInclude>
-    <ClInclude Include="OpenPose.h">
-      <Filter>소스 파일\ThisApp</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenPoseRenderer.h">
-      <Filter>소스 파일\ThisApp</Filter>
-    </ClInclude>
     <ClInclude Include="RenderContext.h">
       <Filter>소스 파일\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenPose.h">
+      <Filter>소스 파일\ThisApp\OpenPose</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenPoseRenderer.h">
+      <Filter>소스 파일\ThisApp\OpenPose</Filter>
+    </ClInclude>
+    <ClInclude Include="Vmd.h">
+      <Filter>소스 파일\ThisApp\VMD</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
