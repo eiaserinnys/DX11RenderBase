@@ -69,10 +69,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex;..\..\DirectXTK\Inc;..</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex;..\..\DirectXTK\Inc;..\..\rapidjson\include\rapidjson;..</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex;..\..\DirectXTK\Inc;..</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\DirectXTex\DirectXTex;..\..\DirectXTK\Inc;..\..\rapidjson\include\rapidjson;..</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="OpenPose.cpp" />
     <ClCompile Include="ThisApp.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="WinMain.cpp" />
@@ -131,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h" />
+    <ClInclude Include="OpenPose.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SceneDescriptor.h" />

@@ -102,5 +102,8 @@
     <ClInclude Include="ShaderManager.h">
       <Filter>Manager\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

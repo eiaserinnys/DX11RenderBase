@@ -30,4 +30,15 @@ struct WindowsUtility
 		WNDPROC wndProc);
 
 	static int MessagePump(const std::function<void()>& functor);
+
+	static inline void Debug(const wchar_t* format, ...)
+	{
+		wchar_t buffer[4096];
+		va_list vaList;
+		va_start(vaList, format);
+		_vsnwprintf(buffer, 4096, format, vaList);
+		va_end(vaList);
+
+		OutputDebugString(buffer);
+	}
 };

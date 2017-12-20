@@ -183,6 +183,7 @@
     <ClInclude Include="DX11InputLayout.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="Utility.h" />
     <ClInclude Include="WindowsUtility.h" />
   </ItemGroup>
   <ItemGroup>

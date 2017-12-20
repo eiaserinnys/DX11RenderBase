@@ -38,6 +38,9 @@
     <ClCompile Include="ThisApp.cpp">
       <Filter>소스 파일\ThisApp</Filter>
     </ClCompile>
+    <ClCompile Include="OpenPose.cpp">
+      <Filter>소스 파일\ThisApp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -53,6 +56,9 @@
       <Filter>소스 파일\Render</Filter>
     </ClInclude>
     <ClInclude Include="ThisApp.h">
+      <Filter>소스 파일\ThisApp</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenPose.h">
       <Filter>소스 파일\ThisApp</Filter>
     </ClInclude>
   </ItemGroup>
