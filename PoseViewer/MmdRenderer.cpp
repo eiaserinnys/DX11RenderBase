@@ -76,6 +76,7 @@ public:
 		{
 			D3D11_RASTERIZER_DESC rsDesc;
 			IDX11RasterizerState::DefaultDesc(rsDesc);
+			rsDesc.FillMode = D3D11_FILL_WIREFRAME;
 			rasterState.reset(IDX11RasterizerState::Create(d3dDev, rsDesc));
 
 			D3D11_DEPTH_STENCIL_DESC dsDesc;
@@ -260,7 +261,7 @@ public:
 			v.y = w * v0.y + (1.0f - w) * v1.y;
 			v.z = w * v0.z + (1.0f - w) * v1.z;
 
-			vertices[i] = v;
+			vertices[i] = v / 20.0f;
 		}
 
 		pos->UpdateDiscard(

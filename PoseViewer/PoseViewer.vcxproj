@@ -155,6 +155,12 @@
       <Project>{4ead9816-5cc9-42c1-a8e1-e337271ef0d3}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Mmd.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

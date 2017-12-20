@@ -283,7 +283,11 @@ public:
 		{
 			XMFLOAT3 ofs(0, 0, 0);
 			float dist = 5.0f;
-			sceneDesc.Build(hWnd, ofs + XMFLOAT3(0, -30, 0), ofs, rot);
+			sceneDesc.Build(
+				hWnd, 
+				XMFLOAT3(0, 0, 3), 
+				XMFLOAT3(0, 0.5f, 0), 
+				rot);
 			mmdRender->Render(pmdModel.get(), sceneDesc);
 		}
 

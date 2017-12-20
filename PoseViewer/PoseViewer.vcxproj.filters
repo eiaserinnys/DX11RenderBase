@@ -86,4 +86,9 @@
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Mmd.fx">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>
