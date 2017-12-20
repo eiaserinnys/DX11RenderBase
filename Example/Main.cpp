@@ -3,6 +3,7 @@
 
 #pragma comment(lib, "D3DCompiler.lib")
 #pragma comment(lib, "D3D11.lib")
+#pragma comment(lib, "winmm.lib")
 
 HINSTANCE g_hInst = NULL;
 HWND g_hWnd = NULL;

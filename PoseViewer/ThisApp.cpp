@@ -57,12 +57,16 @@ public:
 		for (auto frame : vmdMotion->bone_frames)
 		{
 			WindowsUtility::Debug(
-				L"%d %s %f,%f,%f\n", 
+				L"%d %s %f,%f,%f %f,%f,%f,%f\n", 
 				frame.frame,
 				frame.wname.c_str(),
 				frame.position[0], 
 				frame.position[1],
-				frame.position[2]);
+				frame.position[2],
+				frame.orientation[0], 
+				frame.orientation[1], 
+				frame.orientation[2], 
+				frame.orientation[3]);
 		}
 
 		com = XMFLOAT3(0, 0, 0);
@@ -115,7 +119,7 @@ public:
 			for (auto f : frames)
 			{
 				AddFrame(vmdMotion.get(), vmdMotionOut.get(), f, fi);
-				++fi;
+				fi += 5;
 			}
 		}
 
@@ -130,20 +134,37 @@ public:
 		int ref)
 	{
 		XMFLOAT3 front = f.pos[next] - f.pos[pivot];
-		XMFLOAT3 left = f.pos[ref] - f.pos[pivot];
-		XMFLOAT3 up = Cross(front, left);
+		XMFLOAT3 left_ = f.pos[ref] - f.pos[pivot];
+		XMFLOAT3 up = Cross(front, left_);
+		XMFLOAT3 left = Cross(up, front);
 
-		XMMATRIX bone;
+		XMMATRIX bone = XMMatrixIdentity();
 		if (Length(front) == 0 || Length(left) == 0 || Length(up) == 0)
 		{
 			bone = XMMatrixIdentity();
 		}
 		else
 		{
-			bone = XMMatrixLookAtLH(
-				XMLoadFloat3(&f.pos[pivot]),
-				XMLoadFloat3(&f.pos[next]),
-				XMLoadFloat3(&up));
+			Normalize(front);
+			Normalize(left);
+			Normalize(up);
+
+			bone.r[0].m128_f32[0] = front.x;
+			bone.r[0].m128_f32[1] = front.y;
+			bone.r[0].m128_f32[2] = front.z;
+
+			bone.r[1].m128_f32[0] = left.x;
+			bone.r[1].m128_f32[1] = left.y;
+			bone.r[1].m128_f32[2] = left.z;
+
+			bone.r[2].m128_f32[0] = up.x;
+			bone.r[2].m128_f32[1] = up.y;
+			bone.r[2].m128_f32[2] = up.z;
+
+			//bone = XMMatrixLookAtLH(
+			//	XMLoadFloat3(&f.pos[pivot]),
+			//	XMLoadFloat3(&f.pos[next]),
+			//	XMLoadFloat3(&up));
 		}
 
 		return bone;
