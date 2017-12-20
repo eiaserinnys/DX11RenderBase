@@ -97,7 +97,7 @@ struct TextToRender
 
 struct DX11Render
 {
-	DX11Render(HWND hwnd);
+	DX11Render(HWND hwnd, DX11Device* device);
 
 	void Begin(BakeFlag::Value bake = BakeFlag::None);
 	void Render(RenderTuple* tuple, int tupleCount, bool wireframe);
@@ -117,6 +117,7 @@ private:
 	void RenderBackground();
 
 public:
+	DX11Device* device = nullptr;
 	SceneDescriptor sceneDesc;
 	HWND hwnd;
 	std::list<TextToRender> textToRender;

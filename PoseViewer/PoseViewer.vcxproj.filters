@@ -12,16 +12,16 @@
     <Filter Include="소스 파일\Render">
       <UniqueIdentifier>{86463d22-8681-40ac-8bb0-d4cb2a8d3c46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Entry">
+      <UniqueIdentifier>{0b240306-3211-44a2-a458-0428090f32fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\ThisApp">
+      <UniqueIdentifier>{354c1c1e-73c0-415b-aa4b-af0fe7516323}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DX11Main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>헤더 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Global.cpp">
       <Filter>소스 파일\Render</Filter>
@@ -31,6 +31,12 @@
     </ClCompile>
     <ClCompile Include="SceneDescriptor.cpp">
       <Filter>소스 파일\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>소스 파일\Entry</Filter>
+    </ClCompile>
+    <ClCompile Include="ThisApp.cpp">
+      <Filter>소스 파일\ThisApp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +51,9 @@
     </ClInclude>
     <ClInclude Include="SceneDescriptor.h">
       <Filter>소스 파일\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="ThisApp.h">
+      <Filter>소스 파일\ThisApp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

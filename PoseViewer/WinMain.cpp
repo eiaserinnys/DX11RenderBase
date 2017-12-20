@@ -1,7 +1,16 @@
 #include "pch.h"
-#include <Windows.h>
 
 #include <functional>
+#include <memory>
+
+#include <Windows.h>
+
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
+#include <WindowsUtility.h>
+
+#include "ThisApp.h"
 
 #pragma comment(lib, "D3DCompiler.lib")
 #pragma comment(lib, "D3D11.lib")
@@ -9,90 +18,71 @@
 
 using namespace std;
 
-static HINSTANCE g_hInst = NULL;
-static HWND g_hWnd = NULL;
-
-static int windowWidth = 1280;
-static int windowHeight = 720;
+static unique_ptr<IThisApp> thisApp;
 
 //------------------------------------------------------------------------------
-extern INT WINAPI DX11Main(HINSTANCE hInst, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow);
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+//------------------------------------------------------------------------------
+LRESULT CALLBACK WndProc(
+	HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	PAINTSTRUCT ps;
+	HDC hdc;
+
+	switch (message)
+	{
+	case WM_KEYDOWN:
+		thisApp->OnKeyDown(wParam, lParam);
+		break;
+
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		EndPaint(hWnd, &ps);
+		break;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+
+	return 0;
+}
+
+//------------------------------------------------------------------------------
 INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	return DX11Main(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-}
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
 
-//------------------------------------------------------------------------------
-HRESULT InitWindow(HWND& hWnd, HINSTANCE hInstance, int nCmdShow, WNDPROC wndProc)
-{
-	hWnd = nullptr;
+	auto ret = WindowsUtility::RegisterAndCreateOverlappedWindow(
+		hInstance, 
+		L"RendererWndClass", 
+		L"Renderer", 
+		1280, 
+		720, 
+		nCmdShow, 
+		WndProc);
 
-	// Register class
-	WNDCLASSEX wcex;
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = wndProc;
-	wcex.cbClsExtra = 0;
-	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = NULL;// LoadIcon(hInstance, (LPCTSTR)IDI_TUTORIAL1);
-	wcex.hCursor = NULL;//LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = L"DX11RendererWindowClass";
-	wcex.hIconSm = NULL;// LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL1);
-	if (!RegisterClassEx(&wcex))
+	if (FAILED(ret.first)) { return 0; }
+
+	try
 	{
-		return E_FAIL;
+		thisApp.reset(IThisApp::Create(ret.second));
+	}
+	catch (...)
+	{
+		return 0;
 	}
 
-	// Create window
-	g_hInst = hInstance;
-	RECT rc = { 0, 0, windowWidth, windowHeight, };
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-	g_hWnd = CreateWindow(
-		L"DX11RendererWindowClass", 
-		L"DX11Renderer", 
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 
-		CW_USEDEFAULT, 
-		rc.right - rc.left, 
-		rc.bottom - rc.top, 
-		NULL, 
-		NULL, 
-		hInstance,
-		NULL);
+	auto exitCode = WindowsUtility::MessagePump([&] { thisApp->Do(); });
 
-	if (!g_hWnd)
-	{
-		return E_FAIL;
-	}
+	thisApp.reset(nullptr);
 
-	ShowWindow(g_hWnd, nCmdShow);
-
-	hWnd = g_hWnd;
-
-	return S_OK;
+	return exitCode;
 }
 
-//------------------------------------------------------------------------------
-int MessagePump(const function<void()>& functor)
-{
-	// Main message loop
-	MSG msg = { 0 };
-	while (WM_QUIT != msg.message)
-	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			functor();
-		}
-	}
 
-	return (int)msg.wParam;
-}

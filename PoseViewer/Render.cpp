@@ -10,8 +10,6 @@
 using namespace std;
 using namespace DirectX;
 
-extern auto_ptr<GlobalContext> global;
-
 IToRender::~IToRender()
 {
 }
@@ -19,8 +17,8 @@ IToRender::~IToRender()
 ////////////////////////////////////////////////////////////////////////////////
 
 //------------------------------------------------------------------------------
-DX11Render::DX11Render(HWND hwnd)
-	: hwnd(hwnd)
+DX11Render::DX11Render(HWND hwnd, DX11Device* device)
+	: hwnd(hwnd), device(device)
 {
 	//lastTime = timeGetTime();
 }
@@ -54,9 +52,9 @@ void DX11Render::Bake(IToRender* render, const string& srcTexture, const wstring
 		ScratchImage img;
 
 		HRESULT hr = DirectX::CaptureTexture(
-			global->d3d11->g_pd3dDevice,
-			global->d3d11->immDevCtx,
-			global->d3d11->GetRenderTarget()->GetTexture(),
+			device->g_pd3dDevice,
+			device->immDevCtx,
+			device->GetRenderTarget()->GetTexture(),
 			img);
 
 		if (SUCCEEDED(hr))
@@ -85,9 +83,9 @@ void DX11Render::UpsampleDepth(IToRender* render, vector<float>& buffer, bool fh
 		ScratchImage img;
 
 		HRESULT hr = DirectX::CaptureTexture(
-			global->d3d11->g_pd3dDevice,
-			global->d3d11->immDevCtx,
-			global->d3d11->GetRenderTarget()->GetTexture(),
+			device->g_pd3dDevice,
+			device->immDevCtx,
+			device->GetRenderTarget()->GetTexture(),
 			img);
 
 		if (SUCCEEDED(hr))
@@ -96,8 +94,8 @@ void DX11Render::UpsampleDepth(IToRender* render, vector<float>& buffer, bool fh
 
 			const float* byFloat = (const float*)image->pixels;
 
-			auto width = global->d3d11->GetRenderTarget()->GetWidth();
-			auto height = global->d3d11->GetRenderTarget()->GetHeight();
+			auto width = device->GetRenderTarget()->GetWidth();
+			auto height = device->GetRenderTarget()->GetHeight();
 
 			buffer.resize(width * height);
 
@@ -113,30 +111,30 @@ void DX11Render::Begin(BakeFlag::Value bake)
 	{
 	default:
 	case BakeFlag::None:
-		global->d3d11->SetScreenshotMode(DX11Device::RenderTarget::Backbuffer);
+		device->SetScreenshotMode(DX11Device::RenderTarget::Backbuffer);
 		break;
 
 	case BakeFlag::Unwrap:
-		global->d3d11->SetScreenshotMode(DX11Device::RenderTarget::ForUnwrap);
+		device->SetScreenshotMode(DX11Device::RenderTarget::ForUnwrap);
 		break;
 
 	case BakeFlag::DepthUpsample:
-		global->d3d11->SetScreenshotMode(DX11Device::RenderTarget::ForUpsample);
+		device->SetScreenshotMode(DX11Device::RenderTarget::ForUpsample);
 		break;
 
 	case BakeFlag::WLS:
-		global->d3d11->SetScreenshotMode(DX11Device::RenderTarget::ForWls);
+		device->SetScreenshotMode(DX11Device::RenderTarget::ForWls);
 		break;
 	}
 
-	global->d3d11->RestoreRenderTarget();
-	global->d3d11->ClearRenderTarget();
+	device->RestoreRenderTarget();
+	device->ClearRenderTarget();
 }
 
 //------------------------------------------------------------------------------
 void DX11Render::End()
 {
-	global->d3d11->g_pSwapChain->Present(0, 0);
+	device->g_pSwapChain->Present(0, 0);
 }
 
 //------------------------------------------------------------------------------
@@ -160,32 +158,32 @@ void DX11Render::RenderPointCloud_(RenderTuple& tuple, bool wireframe)
 	//matOvr.wireframe = GetWireframe(tuple.wireframe, wireframe);
 	//matOvr.noZCompare = tuple.noZCompare;
 
-	//global->dxr->pcEffect->Begin(global->d3d11.get(), temp, matOvr);
+	//global->dxr->pcEffect->Begin(device.get(), temp, matOvr);
 
-	//global->dxr->pcEffect->SetMaterial(global->d3d11.get());
+	//global->dxr->pcEffect->SetMaterial(device.get());
 
 	//tuple.render->Render();
 
-	//global->dxr->pcEffect->End(global->d3d11.get());
+	//global->dxr->pcEffect->End(device.get());
 }
 
 //------------------------------------------------------------------------------
 void DX11Render::RenderBackground()
 {
-	global->d3d11->immDevCtx->ClearState();
-
-	global->d3d11->RestoreRenderTarget();
-
-	global->d3d11->immDevCtx->VSSetShader(global->dxr->quadVS->vs, NULL, 0);
-	global->d3d11->immDevCtx->PSSetShader(global->dxr->quadPS->ps, NULL, 0);
-#if (!SHOW_PRELIT)
-	global->d3d11->SetTexture(0, "Textures/background.dds");
-#else
-	DX11Mesh& mesh = *global->dxr->mesh[0].get();
-	global->d3d11->immDevCtx->PSSetShaderResources(0, 1, &mesh.litResult->srv);
-#endif
-
-	global->d3d11->immDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	global->d3d11->immDevCtx->Draw(3, 0);
+//	device->immDevCtx->ClearState();
+//
+//	device->RestoreRenderTarget();
+//
+//	device->immDevCtx->VSSetShader(global->dxr->quadVS->vs, NULL, 0);
+//	device->immDevCtx->PSSetShader(global->dxr->quadPS->ps, NULL, 0);
+//#if (!SHOW_PRELIT)
+//	device->SetTexture(0, "Textures/background.dds");
+//#else
+//	DX11Mesh& mesh = *global->dxr->mesh[0].get();
+//	device->immDevCtx->PSSetShaderResources(0, 1, &mesh.litResult->srv);
+//#endif
+//
+//	device->immDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//	device->immDevCtx->Draw(3, 0);
 }
 

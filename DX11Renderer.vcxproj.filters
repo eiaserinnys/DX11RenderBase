@@ -5,26 +5,35 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="RawWrapper">
+    <Filter Include="Utility">
+      <UniqueIdentifier>{fbfd0262-ff8a-49ed-b634-7f1ecaed2f73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Wrapper">
       <UniqueIdentifier>{99081a9e-a4ae-4912-abaf-8a82dcded7ab}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RawWrapper\Shader">
+    <Filter Include="Wrapper\Shader">
       <UniqueIdentifier>{012417d5-44ed-4d72-8a82-0111d7f71190}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RawWrapper\DepthStencil">
+    <Filter Include="Wrapper\DepthStencil">
       <UniqueIdentifier>{698ee602-3448-4aaa-86e0-237d22b60643}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RawWrapper\RenderToTexture">
+    <Filter Include="Wrapper\RenderToTexture">
       <UniqueIdentifier>{ad316c43-d475-48f5-9a8a-de53f527cc22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RawWrapper\StateBlocks">
+    <Filter Include="Wrapper\StateBlocks">
       <UniqueIdentifier>{af903d6d-58fc-479d-a30f-618580135282}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RawWrapper\VertexLayout">
+    <Filter Include="Wrapper\VertexLayout">
       <UniqueIdentifier>{59f840a4-76b3-4e30-b044-96120bb72318}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RawWrapper\Buffer">
+    <Filter Include="Wrapper\Buffer">
       <UniqueIdentifier>{0d19e8aa-f776-407e-9b06-712c8824028d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{e35c0cb0-7406-4733-88a2-91dd0cd6b7f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Shader">
+      <UniqueIdentifier>{5d938815-d4a9-473c-befd-bd68926e7c94}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -32,25 +41,31 @@
       <Filter>Precompiled Header</Filter>
     </ClCompile>
     <ClCompile Include="DX11Device.cpp">
-      <Filter>RawWrapper</Filter>
+      <Filter>Wrapper</Filter>
     </ClCompile>
     <ClCompile Include="DX11Shader.cpp">
-      <Filter>RawWrapper\Shader</Filter>
+      <Filter>Wrapper\Shader</Filter>
     </ClCompile>
     <ClCompile Include="DX11DepthStencil.cpp">
-      <Filter>RawWrapper\DepthStencil</Filter>
+      <Filter>Wrapper\DepthStencil</Filter>
     </ClCompile>
     <ClCompile Include="DX11RenderTarget.cpp">
-      <Filter>RawWrapper\RenderToTexture</Filter>
+      <Filter>Wrapper\RenderToTexture</Filter>
     </ClCompile>
     <ClCompile Include="DX11StateBlocks.cpp">
-      <Filter>RawWrapper\StateBlocks</Filter>
+      <Filter>Wrapper\StateBlocks</Filter>
     </ClCompile>
     <ClCompile Include="DX11InputLayout.cpp">
-      <Filter>RawWrapper\VertexLayout</Filter>
+      <Filter>Wrapper\VertexLayout</Filter>
     </ClCompile>
     <ClCompile Include="DX11Buffer.cpp">
-      <Filter>RawWrapper\Buffer</Filter>
+      <Filter>Wrapper\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsUtility.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Manager\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,28 +73,34 @@
       <Filter>Precompiled Header</Filter>
     </ClInclude>
     <ClInclude Include="DX11Device.h">
-      <Filter>RawWrapper</Filter>
+      <Filter>Wrapper</Filter>
     </ClInclude>
     <ClInclude Include="DX11Shader.h">
-      <Filter>RawWrapper\Shader</Filter>
+      <Filter>Wrapper\Shader</Filter>
     </ClInclude>
     <ClInclude Include="DX11DepthStencil.h">
-      <Filter>RawWrapper\DepthStencil</Filter>
+      <Filter>Wrapper\DepthStencil</Filter>
     </ClInclude>
     <ClInclude Include="DX11RenderTarget.h">
-      <Filter>RawWrapper\RenderToTexture</Filter>
+      <Filter>Wrapper\RenderToTexture</Filter>
     </ClInclude>
     <ClInclude Include="DX11ConstantBufferT.h">
-      <Filter>RawWrapper</Filter>
+      <Filter>Wrapper</Filter>
     </ClInclude>
     <ClInclude Include="DX11StateBlocks.h">
-      <Filter>RawWrapper\StateBlocks</Filter>
+      <Filter>Wrapper\StateBlocks</Filter>
     </ClInclude>
     <ClInclude Include="DX11InputLayout.h">
-      <Filter>RawWrapper\VertexLayout</Filter>
+      <Filter>Wrapper\VertexLayout</Filter>
     </ClInclude>
     <ClInclude Include="DX11Buffer.h">
-      <Filter>RawWrapper\Buffer</Filter>
+      <Filter>Wrapper\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsUtility.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Manager\Shader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

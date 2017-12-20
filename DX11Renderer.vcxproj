@@ -169,6 +169,8 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="WindowsUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX11Buffer.h" />
@@ -180,6 +182,8 @@
     <ClInclude Include="DX11StateBlocks.h" />
     <ClInclude Include="DX11InputLayout.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="WindowsUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectXTex\DirectXTex\DirectXTex_Desktop_2015.vcxproj">
