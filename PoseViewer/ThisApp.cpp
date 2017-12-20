@@ -12,7 +12,9 @@
 #include "OpenPose.h"
 #include "OpenPoseRenderer.h"
 
+#include "Pmd.h"
 #include "Vmd.h"
+#include "MmdRenderer.h"
 
 using namespace std;
 using namespace DirectX;
@@ -21,6 +23,7 @@ class ThisApp : public IThisApp {
 public:
 	unique_ptr<RenderContext> global;
 	unique_ptr<IOpenPoseRenderer> openPoseRender;
+	unique_ptr<IMmdRenderer> mmdRender;
 	unique_ptr<DX11Render> render;
 	HWND hWnd;
 
@@ -32,21 +35,52 @@ public:
 
 	XMFLOAT3 com;
 
+	unique_ptr<pmd::PmdModel> pmdModel;
+
+	bool init = false;
+
 	ThisApp(HWND hWnd)
 		: hWnd(hWnd)
 	{
 		global.reset(new RenderContext(hWnd));
 		render.reset(new DX11Render(hWnd, global->d3d11.get()));
 		openPoseRender.reset(IOpenPoseRenderer::Create(global.get()));
+		mmdRender.reset(IMmdRenderer::Create(global.get()));
 
 		Load();
 	}
 
 	void Load()
 	{
+		// PMD를 로드해본다
+		pmdModel = pmd::PmdModel::LoadFromFile("MMD/md_m.pmd");
+
+		for (size_t i = 0; i < pmdModel->bones.size(); ++i)
+		{
+			auto& b = pmdModel->bones[i];
+
+			WindowsUtility::Debug(
+				L"[%03d] %s (%d)",
+				i,
+				vmd::sjis2utf8(b.name).c_str(),
+				b.bone_type);
+
+			if (b.parent_bone_index != 0xffff)
+			{
+				WindowsUtility::Debug(
+					L" -> [%03d] %s\n",
+					b.parent_bone_index, 
+					vmd::sjis2utf8(pmdModel->bones[b.parent_bone_index].name).c_str());
+			}
+			else
+			{
+				WindowsUtility::Debug(L"\n");
+			}
+		}
+
 		// VMD를 로드해본다
 		std::ifstream is;
-		is.open("Vmd/Happy Hands Meme.vmd", std::ios::in | std::ios::binary);
+		is.open("MMD/Happy Hands Meme.vmd", std::ios::in | std::ios::binary);
 
 		unique_ptr<vmd::VmdMotion> vmdMotion;
 		if (is.is_open())
@@ -69,6 +103,7 @@ public:
 				frame.orientation[3]);
 		}
 
+		// 오픈포즈를 로드해본다
 		com = XMFLOAT3(0, 0, 0);
 
 		for (int i = 0; ; ++i)
@@ -239,10 +274,18 @@ public:
 		SceneDescriptor sceneDesc;
 
 		XMMATRIX rot = XMMatrixIdentity();
-		float dist = 0.75f;
-		sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
+		{
+			//float dist = 0.75f;
+			//sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
+			//openPoseRender->Render(frames[cur], sceneDesc);
+		}
 
-		openPoseRender->Render(frames[cur], sceneDesc);
+		{
+			XMFLOAT3 ofs(0, 0, 0);
+			float dist = 5.0f;
+			sceneDesc.Build(hWnd, ofs + XMFLOAT3(0, -30, 0), ofs, rot);
+			mmdRender->Render(pmdModel.get(), sceneDesc);
+		}
 
 		if (advance)
 		{

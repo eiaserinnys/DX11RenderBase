@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MmdRenderer.cpp" />
     <ClCompile Include="OpenPose.cpp" />
     <ClCompile Include="OpenPoseRenderer.cpp" />
     <ClCompile Include="ThisApp.cpp" />
@@ -132,6 +133,8 @@
     <ClCompile Include="SceneDescriptor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MmdRenderer.h" />
+    <ClInclude Include="Pmd.h" />
     <ClInclude Include="RenderContext.h" />
     <ClInclude Include="OpenPose.h" />
     <ClInclude Include="OpenPoseRenderer.h" />

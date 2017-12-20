@@ -21,7 +21,7 @@
     <Filter Include="소스 파일\ThisApp\OpenPose">
       <UniqueIdentifier>{e96c2e9c-e266-4ad8-ac51-32b75ada36e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\ThisApp\VMD">
+    <Filter Include="소스 파일\ThisApp\MMD">
       <UniqueIdentifier>{c0e0076e-56e5-4b40-bddc-23761288b4ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -50,6 +50,9 @@
     <ClCompile Include="OpenPoseRenderer.cpp">
       <Filter>소스 파일\ThisApp\OpenPose</Filter>
     </ClCompile>
+    <ClCompile Include="MmdRenderer.cpp">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -74,7 +77,13 @@
       <Filter>소스 파일\ThisApp\OpenPose</Filter>
     </ClInclude>
     <ClInclude Include="Vmd.h">
-      <Filter>소스 파일\ThisApp\VMD</Filter>
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="Pmd.h">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="MmdRenderer.h">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

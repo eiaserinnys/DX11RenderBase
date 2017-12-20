@@ -79,6 +79,7 @@ DX11Device::DX11Device(HWND hwnd)
 	if (FAILED(hr)) { return; }
 
 	// 미디어 플레이어가 멀티 스레드 접근하기 때문에???
+#if 0
 	{
 		ID3D10Multithread* spMultithread;
 		if (FAILED(g_pd3dDevice->QueryInterface(IID_PPV_ARGS(&spMultithread))))
@@ -88,6 +89,7 @@ DX11Device::DX11Device(HWND hwnd)
 		spMultithread->SetMultithreadProtected(TRUE);
 		spMultithread->Release();
 	}
+#endif
 
 	// Create a render target view
 	ID3D11Texture2D* pBackBuffer = NULL;
@@ -96,17 +98,25 @@ DX11Device::DX11Device(HWND hwnd)
 
 	hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
 	pBackBuffer->Release();
+	assert(g_pRenderTargetView != nullptr);
+
 	if (FAILED(hr)) { return; }
 
 	depthStencil.reset(new DX11DepthStencil(g_pd3dDevice, width, height));
+	assert(depthStencil.get() != nullptr);
 
 	// 스크린샷용 렌더 타겟을 만들어둔다
 	unwrapRT.reset(IDX11RenderTarget::Create_GenericRenderTarget(
 		g_pd3dDevice, DXGI_FORMAT_B8G8R8A8_UNORM, unwrapWidth, unwrapHeight));
+	assert(unwrapRT.get() != nullptr);
+
 	upsampleRT.reset(IDX11RenderTarget::Create_GenericRenderTarget(
 		g_pd3dDevice, DXGI_FORMAT_R32_FLOAT, upsampleWidth, upsampleHeight));
+	assert(upsampleRT.get() != nullptr);
+
 	wlsRT.reset(IDX11RenderTarget::Create_GenericRenderTarget(
 		g_pd3dDevice, DXGI_FORMAT_R32_FLOAT, wlsWidth, wlsHeight));
+	assert(wlsRT.get() != nullptr);
 
 	RestoreRenderTarget();
 

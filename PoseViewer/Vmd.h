@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// https://github.com/oguna/MMDFormats
+
+#pragma once
 
 #include <vector>
 #include <string>
