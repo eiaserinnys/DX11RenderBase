@@ -105,7 +105,7 @@ public:
 		ind.reset(IDX11Buffer::Create_DynamicIB(
 			context->d3d11->g_pd3dDevice,
 			sizeof(UINT16),
-			50000));
+			50000 * sizeof(UINT16)));
 	}
 
 	//--------------------------------------------------------------------------
@@ -136,7 +136,7 @@ public:
 		ind->ApplyIB(context->d3d11->immDevCtx, 0);
 		context->d3d11->immDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		context->d3d11->immDevCtx->DrawIndexed(model->indices.size() / 3, 0, 0);
+		context->d3d11->immDevCtx->DrawIndexed(model->indices.size(), 0, 0);
 	}
 
 	//--------------------------------------------------------------------------
