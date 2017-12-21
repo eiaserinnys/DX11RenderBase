@@ -64,6 +64,20 @@ OpenPose::Frame::Frame()
 	}
 }
 
+void OpenPose::Frame::CalculateLink()
+{
+	worldInvTx.resize(worldTx.size());
+	for (int i = 0; i < worldTx.size(); ++i)
+	{
+		XMMATRIX base = worldTx[i];
+		base.r[3].m128_f32[0] = 0;
+		base.r[3].m128_f32[1] = 0;
+		base.r[3].m128_f32[2] = 0;
+
+		worldInvTx[i] = XMMatrixInverse(nullptr, base);
+	}
+}
+
 void OpenPose::Frame::CalculateTx()
 {
 	CalculateCom();
@@ -86,38 +100,56 @@ void OpenPose::Frame::CalculateTx()
 	// 루트 방향을 업 방향으로 하는 트랜스폼을 계산한다
 
 	// 일단 다리만 해보자
-	int pivot = 8;
+	pair<int, int> p[] =
+	{
+		make_pair(2, 3),
+		make_pair(3, 4),
 
-	XMMATRIX& targetTx = worldTx[9];
+		make_pair(5, 6),
+		make_pair(6, 7),
 
-	XMFLOAT3 parPos(
-		targetTx.r[3].m128_f32[0],
-		targetTx.r[3].m128_f32[1],
-		targetTx.r[3].m128_f32[2]);
-	XMFLOAT3 myPos = pos[pivot];
+		make_pair(8, 9),
+		make_pair(9, 10),
 
-	XMFLOAT3 front(
-		targetTx.r[2].m128_f32[0],
-		targetTx.r[2].m128_f32[1],
-		targetTx.r[2].m128_f32[2]);
-	XMFLOAT3 up = parPos - myPos;
-	up = Normalize(up);
+		make_pair(11, 12),
+		make_pair(12, 13),
+	};
 
-	XMFLOAT3 left = Cross(up, front);
+	for (int i = 0; i < COUNT_OF(p); ++i)
+	{
+		int pivot = p[i].first;
 
-	XMMATRIX& myTx = worldTx[pivot];
+		XMMATRIX& targetTx = worldTx[p[i].second];
 
-	myTx.r[0].m128_f32[0] = left.x;
-	myTx.r[0].m128_f32[1] = left.y;
-	myTx.r[0].m128_f32[2] = left.z;
+		XMFLOAT3 targetPos(
+			targetTx.r[3].m128_f32[0],
+			targetTx.r[3].m128_f32[1],
+			targetTx.r[3].m128_f32[2]);
+		XMFLOAT3 myPos = pos[pivot];
 
-	myTx.r[1].m128_f32[0] = up.x;
-	myTx.r[1].m128_f32[1] = up.y;
-	myTx.r[1].m128_f32[2] = up.z;
+		XMFLOAT3 front(
+			targetTx.r[2].m128_f32[0],
+			targetTx.r[2].m128_f32[1],
+			targetTx.r[2].m128_f32[2]);
+		XMFLOAT3 up = myPos - targetPos;
+		up = Normalize(up);
 
-	myTx.r[2].m128_f32[0] = front.x;
-	myTx.r[2].m128_f32[1] = front.y;
-	myTx.r[2].m128_f32[2] = front.z;
+		XMFLOAT3 left = Cross(up, front);
+
+		XMMATRIX& myTx = worldTx[pivot];
+
+		myTx.r[0].m128_f32[0] = left.x;
+		myTx.r[0].m128_f32[1] = left.y;
+		myTx.r[0].m128_f32[2] = left.z;
+
+		myTx.r[1].m128_f32[0] = up.x;
+		myTx.r[1].m128_f32[1] = up.y;
+		myTx.r[1].m128_f32[2] = up.z;
+
+		myTx.r[2].m128_f32[0] = front.x;
+		myTx.r[2].m128_f32[1] = front.y;
+		myTx.r[2].m128_f32[2] = front.z;
+	}
 }
 
 void OpenPose::Frame::CalculateCom()

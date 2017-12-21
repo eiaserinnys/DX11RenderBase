@@ -39,8 +39,8 @@ void SceneDescriptor::Build(
 
 	// ºä
 	float distance = 7.5f; // 4.8f;
-	float zMin = 1.0f;
-	float zMax = 50.0f;
+	float zMin = 0.1f;
+	float zMax = 20.0f;
 
 	XMVECTOR upVec = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR atVec = XMVectorSet(at_.x, at_.y, at_.z, 0);

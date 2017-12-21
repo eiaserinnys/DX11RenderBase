@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include "pmd.h"
+#include "OpenPose.h"
 
 class IMmdPlayer {
 public:
@@ -19,7 +20,7 @@ public:
 
 	virtual void Load() = 0;
 
-	virtual void Update() = 0;
+	virtual void Update(OpenPose::Frame& frame) = 0;
 
 	static IMmdPlayer* Create();
 };

@@ -186,7 +186,7 @@ public:
 				tx.r[2].m128_f32[1],
 				tx.r[2].m128_f32[2]);
 
-			float scale = 0.033f;
+			float scale = 0.01f;
 
 			ind_.push_back(pos_.size());
 			ind_.push_back(pos_.size() + 1);

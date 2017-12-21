@@ -469,7 +469,7 @@ public:
 	}
 
 #if USE_PMX
-	void Update()
+	void Update(OpenPose::Frame& opf)
 	{
 		int frame = 0;
 
@@ -537,6 +537,19 @@ public:
 				}
 			}
 		}
+
+		// com을 일단 복사해보자!
+		localTx[4].r[0].m128_f32[0] = opf.comTx.r[0].m128_f32[0];
+		localTx[4].r[0].m128_f32[1] = opf.comTx.r[0].m128_f32[1];
+		localTx[4].r[0].m128_f32[2] = opf.comTx.r[0].m128_f32[2];
+
+		localTx[4].r[1].m128_f32[0] = opf.comTx.r[1].m128_f32[0];
+		localTx[4].r[1].m128_f32[1] = opf.comTx.r[1].m128_f32[1];
+		localTx[4].r[1].m128_f32[2] = opf.comTx.r[1].m128_f32[2];
+
+		localTx[4].r[2].m128_f32[0] = opf.comTx.r[2].m128_f32[0];
+		localTx[4].r[2].m128_f32[1] = opf.comTx.r[2].m128_f32[1];
+		localTx[4].r[2].m128_f32[2] = opf.comTx.r[2].m128_f32[2];
 
 		// 월드 트랜스폼을 빌드
 		worldTx.resize(model->bone_count);

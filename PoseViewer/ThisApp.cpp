@@ -36,7 +36,8 @@ public:
 	int cur = 0;
 
 	bool advance = false;
-	int pivotTime = 0;
+	int lastTime = 0;
+	int totalAdvance = 0;
 
 	XMFLOAT3 com;
 
@@ -64,17 +65,25 @@ public:
 		mmdPlayer->Load();
 
 		// 레퍼런스 포즈를 로드한다
+		OpenPose::Load("Pose/miku_keypoints.json", refFrame);
+		com = refFrame.com;
+		refFrame.CalculateLink();
+
 		{
-			OpenPose::Frame refFrame;
-
-			OpenPose::Load("Pose/miku_keypoints.json", refFrame);
-
-			com = refFrame.com;
-
-			frames.push_back(refFrame);
+			if (!refFrame.worldTx.empty())
+			{
+				for (int i = 0; i < COUNT_OF(refFrame.pos); ++i)
+				{
+					refFrame.worldTx[i] = XMMatrixMultiply(
+						refFrame.worldInvTx[i], 
+						refFrame.worldTx[i]);
+				}
+			}
 		}
 
-#if 0
+		//frames.push_back(refFrame);
+
+#if 1
 		// 오픈포즈를 로드해본다
 		com = XMFLOAT3(0, 0, 0);
 
@@ -98,6 +107,17 @@ public:
 					{
 						const auto& last = *frames.rbegin();
 						frame.pos[i] = last.pos[i];
+					}
+				}
+
+				// 레퍼런스의 인버스를 곱하자!
+				if (!frame.worldTx.empty())
+				{
+					for (int i = 0; i < COUNT_OF(frame.pos); ++i)
+					{
+						frame.worldTx[i] = XMMatrixMultiply(
+							refFrame.worldInvTx[i], 
+							frame.worldTx[i]);
 					}
 				}
 
@@ -161,7 +181,15 @@ public:
 		XMMATRIX rot = arcBall->GetRotationMatrix();
 
 		{
-			mmdPlayer->Update();
+			float dist = 1.0f;
+			sceneDesc.Build(hWnd, com + XMFLOAT3(0, 0, -dist), com, rot);
+			openPoseRender->Render(render.get(), frames[cur], sceneDesc);
+
+			render->RenderText(sceneDesc.worldViewProj);
+		}
+
+		{
+			mmdPlayer->Update(frames[cur]);
 
 			XMFLOAT3 ofs(0, 0, 0);
 			float dist = 5.0f;
@@ -176,24 +204,21 @@ public:
 			render->RenderText(sceneDesc.worldViewProj);
 		}
 
-		{
-			float dist = 2.0f;
-			sceneDesc.Build(hWnd, com + XMFLOAT3(0, 0, -dist), com, rot);
-			openPoseRender->Render(render.get(), frames[cur], sceneDesc);
-
-			render->RenderText(sceneDesc.worldViewProj);
-		}
-
 		if (advance)
 		{
-			if (pivotTime == 0)
+			int curTime = timeGetTime();
+
+			if (lastTime == 0)
 			{
-				pivotTime = timeGetTime();
+				lastTime = curTime;
 			}
 
-			int totalAdvance = timeGetTime() - pivotTime;
+			int curAdv = curTime - lastTime;
+			lastTime = curTime;
 
-			cur = (int)(totalAdvance / 1000.0f * 30);
+			totalAdvance += curAdv;
+
+			cur = (int)(totalAdvance / 1000.0f * 30 / 2) ;
 			cur = cur % frames.size();
 		}
 
@@ -216,6 +241,7 @@ public:
 		if (wParam == VK_F1)
 		{
 			advance = !advance;
+			lastTime = 0;
 		}
 	}
 };
