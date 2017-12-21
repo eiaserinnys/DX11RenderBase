@@ -11,6 +11,9 @@
 
 #include "Pmd.h"
 #include "Vmd.h"
+#include "Pmx.h"
+
+#define USE_PMX 1
 
 using namespace std;
 using namespace DirectX;
@@ -18,11 +21,12 @@ using namespace DirectX;
 //------------------------------------------------------------------------------
 class MmdPlayer : public IMmdPlayer {
 public:
-	unique_ptr<pmd::PmdModel> model;
+	//unique_ptr<pmd::PmdModel> model;
+	unique_ptr<pmx::PmxModel> model;
 	unique_ptr<vmd::VmdMotion> motion;
 
 	vector<XMFLOAT3> vertices;
-	vector<uint16_t> indices;
+	vector<int> indices;
 
 	vector<vector<vmd::VmdBoneFrame>*> frames;
 
@@ -35,7 +39,7 @@ public:
 	const XMFLOAT3* GetVertices() const { return vertices.empty() ? nullptr : &vertices[0]; }
 	int GetVerticesCount() const { return (int) vertices.size(); }
 
-	const uint16_t* GetIndices() const { return indices.empty() ? nullptr : &indices[0]; }
+	const int* GetIndices() const { return indices.empty() ? nullptr : &indices[0]; }
 	int GetIndicesCount() const { return (int)indices.size(); }
 
 	virtual const DirectX::XMMATRIX* GetWorldTransform() const { return worldTx.empty() ? nullptr : &worldTx[0]; }
@@ -56,13 +60,18 @@ public:
 
 	void Load()
 	{
+#if !USE_PMX
 		LoadPmd();
+#else
+		LoadPmx();
+#endif
 
 		LoadVmd();
 
 		LinkAnimation();
 	}
 
+#if !USE_PMX
 	void LoadPmd()
 	{
 		// PMD를 로드해본다
@@ -91,6 +100,42 @@ public:
 			}
 		}
 	}
+#else
+	void LoadPmx()
+	{
+		model.reset(new pmx::PmxModel);
+
+		std::ifstream is;
+		is.open("MMD/Tda Miku DressB.pmx", std::ios::in | std::ios::binary);
+
+		if (is.is_open())
+		{
+			model->Read(&is);
+
+			for (size_t i = 0; i < model->bone_count; ++i)
+			{
+				auto& b = model->bones[i];
+
+				WindowsUtility::Debug(
+					L"[%03d] %s",
+					i, 
+					b.bone_name.c_str());
+
+				if (b.parent_index >= 0)
+				{
+					WindowsUtility::Debug(
+						L" -> [%03d] %s\n",
+						b.parent_index,
+						model->bones[b.parent_index].bone_name.c_str());
+				}
+				else
+				{
+					WindowsUtility::Debug(L"\n");
+				}
+			}
+		}
+	}
+#endif
 
 	void LoadVmd()
 	{
@@ -129,6 +174,17 @@ public:
 	void LinkAnimation()
 	{
 		// 이름 리스트를 만든다
+#if USE_PMX
+		map<wstring, int> modelBones;
+
+		for (int i = 0; i < model->bone_count; ++i)
+		{
+			modelBones.insert(make_pair(model->bones[i].bone_name, i));
+		}
+
+		// 애니메이션에서 매칭되는 본에 프레임을 누적한다
+		frames.resize(model->bone_count);
+#else
 		map<string, int> modelBones;
 
 		for (int i = 0; i < model->bones.size(); ++i)
@@ -138,10 +194,11 @@ public:
 
 		// 애니메이션에서 매칭되는 본에 프레임을 누적한다
 		frames.resize(model->bones.size());
+#endif
 
 		for (auto& f : motion->bone_frames)
 		{
-			auto it = modelBones.find(f.name);
+			auto it = modelBones.find(vmd::sjis2utf8(f.name));
 			if (it != modelBones.end())
 			{
 				int index = it->second;
@@ -408,6 +465,179 @@ public:
 		}
 	}
 
+#if USE_PMX
+	void Update()
+	{
+		int frame = 0;
+
+		if (pivotTime == 0) { pivotTime = timeGetTime(); }
+
+		auto elapsedSec = (timeGetTime() - pivotTime) / 1000.0;
+		frame = (int)(elapsedSec * 30);
+
+		// 로컬 트랜스폼을 빌드
+		vector<XMMATRIX> localTx;
+		localTx.resize(model->bone_count);
+
+		for (size_t i = 0; i < model->bone_count; ++i)
+		{
+			auto& bone = model->bones[i];
+
+			localTx[i] = XMMatrixIdentity();
+
+			//if (frames[i] == nullptr) 
+			if (true)
+			{
+				//bone.rotation[0] = 0.0;
+				//bone.rotation[1] = 0.0;
+				//bone.rotation[2] = 0.0;
+				//bone.rotation[3] = 1.0;
+
+				if (bone.parent_index < 0)
+				{
+					localTx[i].r[3].m128_f32[0] = bone.position[0];
+					localTx[i].r[3].m128_f32[1] = bone.position[1];
+					localTx[i].r[3].m128_f32[2] = bone.position[2];
+				}
+				else
+				{
+					auto& parent = model->bones[bone.parent_index];
+
+					localTx[i].r[3].m128_f32[0] = bone.position[0] - parent.position[0];
+					localTx[i].r[3].m128_f32[1] = bone.position[1] - parent.position[1];
+					localTx[i].r[3].m128_f32[2] = bone.position[2] - parent.position[2];
+				}
+			}
+			else
+			{
+				auto ms = FindMotionSegment(frame, *frames[i]);
+
+				XMFLOAT4 motionRot;
+				float motionPos[3];
+				InterpolateMotion(motionRot, motionPos, *frames[i], ms, frame);
+
+				QuatToMatrix(localTx[i], motionRot);
+
+				if (bone.parent_index < 0)
+				{
+					localTx[i].r[3].m128_f32[0] = bone.position[0] + motionPos[0];
+					localTx[i].r[3].m128_f32[1] = bone.position[1] + motionPos[1];
+					localTx[i].r[3].m128_f32[2] = bone.position[2] + motionPos[2];
+				}
+				else
+				{
+					auto& parent = model->bones[bone.parent_index];
+
+					localTx[i].r[3].m128_f32[0] = (bone.position[0] - parent.position[0]) + motionPos[0];
+					localTx[i].r[3].m128_f32[1] = (bone.position[1] - parent.position[1]) + motionPos[1];
+					localTx[i].r[3].m128_f32[2] = (bone.position[2] - parent.position[2]) + motionPos[2];
+				}
+			}
+		}
+
+		// 월드 트랜스폼을 빌드
+		worldTx.resize(model->bone_count);
+
+		for (size_t i = 0; i < model->bone_count; ++i)
+		{
+			auto& bone = model->bones[i];
+
+			if (bone.parent_index < 0)
+			{
+				worldTx[i] = localTx[i];
+			}
+			else
+			{
+				MatMul(
+					(float*)&worldTx[i],
+					(float*)&worldTx[bone.parent_index],
+					(float*)&localTx[i]);
+			}
+		}
+
+		// 버텍스를 트랜스폼
+		vertices.resize(model->vertex_count);
+
+		for (int i = 0; i < model->vertex_count; i++)
+		{
+			auto& pv = model->vertices[i];
+			XMFLOAT3 p0, p1;
+			p0.x = pv.positon[0];
+			p0.y = pv.positon[1];
+			p0.z = pv.positon[2];
+			p1.x = pv.positon[0];
+			p1.y = pv.positon[1];
+			p1.z = pv.positon[2];
+
+			unsigned short b0;
+			unsigned short b1;
+			float weight = 0;
+
+			switch (pv.skinning_type) {
+			case pmx::PmxVertexSkinningType::BDEF1:
+				b0 = ((pmx::PmxVertexSkinningBDEF1*) pv.skinning.get())->bone_index;
+				b1 = ((pmx::PmxVertexSkinningBDEF1*) pv.skinning.get())->bone_index;
+				weight = 1;
+				break;
+			case pmx::PmxVertexSkinningType::BDEF2:
+				b0 = ((pmx::PmxVertexSkinningBDEF2*) pv.skinning.get())->bone_index1;
+				b1 = ((pmx::PmxVertexSkinningBDEF2*) pv.skinning.get())->bone_index2;
+				weight = ((pmx::PmxVertexSkinningBDEF2*) pv.skinning.get())->bone_weight;
+				break;
+			case pmx::PmxVertexSkinningType::BDEF4:
+				b0 = ((pmx::PmxVertexSkinningBDEF4*) pv.skinning.get())->bone_index1;
+				b1 = ((pmx::PmxVertexSkinningBDEF4*) pv.skinning.get())->bone_index2;
+				weight = ((pmx::PmxVertexSkinningBDEF4*) pv.skinning.get())->bone_weight1;
+				break;
+			case pmx::PmxVertexSkinningType::SDEF:
+				b0 = ((pmx::PmxVertexSkinningSDEF*) pv.skinning.get())->bone_index1;
+				b1 = ((pmx::PmxVertexSkinningSDEF*) pv.skinning.get())->bone_index2;
+				weight = ((pmx::PmxVertexSkinningSDEF*) pv.skinning.get())->bone_weight;
+				break;
+			case pmx::PmxVertexSkinningType::QDEF:
+				b0 = ((pmx::PmxVertexSkinningQDEF*) pv.skinning.get())->bone_index1;
+				b1 = ((pmx::PmxVertexSkinningQDEF*) pv.skinning.get())->bone_index2;
+				weight = ((pmx::PmxVertexSkinningQDEF*) pv.skinning.get())->bone_weight1;
+				break;
+			}
+
+			auto& m0 = worldTx[b0];
+			auto& m1 = worldTx[b1];
+
+			XMFLOAT3 v0;
+			XMFLOAT3 v1;
+			XMFLOAT3 v;
+
+			// Bone matrix is defined in absolute coordinates.
+			// Pass a vertex in relative coordinate to bone matrix.
+			p0.x -= model->bones[b0].position[0];
+			p0.y -= model->bones[b0].position[1];
+			p0.z -= model->bones[b0].position[2];
+			p1.x -= model->bones[b1].position[0];
+			p1.y -= model->bones[b1].position[1];
+			p1.z -= model->bones[b1].position[2];
+
+			MatVMul(v0, m0, p0);
+			MatVMul(v1, m1, p1);
+			float w = weight / 100.0f;
+			v.x = w * v0.x + (1.0f - w) * v1.x;
+			v.y = w * v0.y + (1.0f - w) * v1.y;
+			v.z = w * v0.z + (1.0f - w) * v1.z;
+
+			vertices[i] = v / 20.0f;
+		}
+
+		indices.resize(model->index_count);
+		if (!indices.empty())
+		{
+			memcpy(
+				&indices[0], 
+				&model->indices[0], 
+				model->index_count * sizeof(indices[0]));
+		}
+	}
+
+#else
 	void Update()
 	{
 		int frame = 0;
@@ -545,6 +775,7 @@ public:
 			memcpy(&indices[0], &model->indices[0], model->indices.size() * sizeof(uint16_t));
 		}
 	}
+#endif
 
 	static void MatMul(float dst[16], float m0[16], float m1[16])
 	{

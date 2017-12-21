@@ -59,6 +59,9 @@
     <ClCompile Include="MmdBoneRenderer.cpp">
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClCompile>
+    <ClCompile Include="Pmx.cpp">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -95,6 +98,12 @@
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
     <ClInclude Include="MmdBoneRenderer.h">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="Pmx.h">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="EncodingHelper.h">
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
   </ItemGroup>

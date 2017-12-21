@@ -40,7 +40,6 @@ struct MmdEffectConstants
 	{
 		cbChangesEveryFrameMem.mWorld = sceneDesc.world;
 		cbChangesEveryFrameMem.viewProj = XMMatrixMultiply(sceneDesc.proj, sceneDesc.view);
-
 		cbChangesEveryFrameMem.eyePos = sceneDesc.eye;
 
 		UpdateInternal(devCtx);
@@ -101,12 +100,12 @@ public:
 		pos.reset(IDX11Buffer::Create_DynamicVB(
 			context->d3d11->g_pd3dDevice,
 			sizeof(XMFLOAT3),
-			20000 * sizeof(XMFLOAT3)));
+			40000 * sizeof(XMFLOAT3)));
 
 		ind.reset(IDX11Buffer::Create_DynamicIB(
 			context->d3d11->g_pd3dDevice,
-			sizeof(UINT16),
-			50000 * sizeof(UINT16)));
+			sizeof(UINT32),
+			150000 * sizeof(UINT32)));
 	}
 
 	//--------------------------------------------------------------------------

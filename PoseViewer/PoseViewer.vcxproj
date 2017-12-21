@@ -124,6 +124,7 @@
     <ClCompile Include="MmdRenderer.cpp" />
     <ClCompile Include="OpenPose.cpp" />
     <ClCompile Include="OpenPoseRenderer.cpp" />
+    <ClCompile Include="Pmx.cpp" />
     <ClCompile Include="ThisApp.cpp" />
     <ClCompile Include="RenderContext.cpp" />
     <ClCompile Include="WinMain.cpp" />
@@ -135,10 +136,12 @@
     <ClCompile Include="SceneDescriptor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EncodingHelper.h" />
     <ClInclude Include="MmdBoneRenderer.h" />
     <ClInclude Include="MmdPlayer.h" />
     <ClInclude Include="MmdRenderer.h" />
     <ClInclude Include="Pmd.h" />
+    <ClInclude Include="Pmx.h" />
     <ClInclude Include="RenderContext.h" />
     <ClInclude Include="OpenPose.h" />
     <ClInclude Include="OpenPoseRenderer.h" />
