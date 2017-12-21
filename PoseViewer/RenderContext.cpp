@@ -2,6 +2,7 @@
 #include "RenderContext.h"
 
 using namespace std;
+using namespace DirectX;
 
 RenderContext::RenderContext(HWND hwnd)
 	: hwnd(hwnd)

@@ -62,8 +62,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		hInstance, 
 		L"RendererWndClass", 
 		L"Renderer", 
-		640, 
-		360, 
+		640 * 2, 
+		360 * 2,
 		nCmdShow, 
 		WndProc);
 

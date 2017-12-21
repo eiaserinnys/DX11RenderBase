@@ -21,6 +21,9 @@ DX11Render::DX11Render(HWND hwnd, DX11Device* device)
 	: hwnd(hwnd), device(device)
 {
 	//lastTime = timeGetTime();
+
+	spriteBatch.reset(new SpriteBatch(device->immDevCtx));
+	font.reset(new SpriteFont(device->g_pd3dDevice, L"Font/font12.spritefont"));
 }
 
 //------------------------------------------------------------------------------
@@ -28,7 +31,7 @@ void DX11Render::Render(RenderTuple* tuples, int count, bool wireframe)
 {
 	if (tuples != nullptr && count > 0)
 	{
-		RenderInternal(tuples, count, BakeFlag::None, wireframe);
+		//RenderInternal(tuples, count, BakeFlag::None, wireframe);
 	}
 }
 
@@ -45,7 +48,7 @@ void DX11Render::Bake(IToRender* render, const string& srcTexture, const wstring
 
 	Begin(flag);
 
-	RenderInternal(&tuple, 1, flag, false);
+	//RenderInternal(&tuple, 1, flag, false);
 
 	//End(flag);
 	{
@@ -76,7 +79,7 @@ void DX11Render::UpsampleDepth(IToRender* render, vector<float>& buffer, bool fh
 
 	Begin(flag);
 
-	RenderInternal(&tuple, 1, flag, false);
+	//RenderInternal(&tuple, 1, flag, false);
 
 	//End(flag);
 	{
@@ -138,52 +141,49 @@ void DX11Render::End()
 }
 
 //------------------------------------------------------------------------------
-void DX11Render::RenderInternal(
-	RenderTuple* tuple, int count, BakeFlag::Value bake, bool wireframe)
+void DX11Render::RenderText(const XMMATRIX& wvp_)
 {
-	// 포인트 클라우드 렌더링
-	for (int i = 0; i < count; ++i)
+	if (!textToRender.empty())
 	{
-		RenderPointCloud_(tuple[i], wireframe);
+		device->RestoreRenderTarget();
+
+		spriteBatch->Begin();
+
+		XMMATRIX wvp = XMMatrixTranspose(wvp_);
+
+		for (auto tit = textToRender.begin(); tit != textToRender.end(); ++tit)
+		{
+			XMVECTOR pos;
+			if (tit->is3d)
+			{
+				pos = XMVector3Transform(XMLoadFloat3(&tit->pos), wvp);
+
+				pos.m128_f32[0] /= pos.m128_f32[3];
+				pos.m128_f32[1] /= pos.m128_f32[3];
+				pos.m128_f32[2] /= pos.m128_f32[3];
+				pos.m128_f32[3] /= pos.m128_f32[3];
+				pos.m128_f32[0] = (1 + pos.m128_f32[0]) / 2 * device->GetRenderTargetWidth();
+				pos.m128_f32[1] = (1 - pos.m128_f32[1]) / 2 * device->GetRenderTargetHeight();
+
+				pos = pos + XMLoadFloat2(&tit->ofs);
+			}
+			else
+			{
+				pos = XMLoadFloat2(&tit->ofs);
+			}
+
+			font->DrawString(
+				spriteBatch.get(),
+				tit->text.c_str(),
+				pos,
+				XMLoadFloat4(&tit->clr));
+		}
+
+		spriteBatch->End();
+
+		device->immDevCtx->ClearState();
+
+		textToRender.clear();
 	}
-}
-
-//------------------------------------------------------------------------------
-void DX11Render::RenderPointCloud_(RenderTuple& tuple, bool wireframe)
-{
-	SceneDescriptor temp = sceneDesc;
-	temp.world = XMLoadFloat4x4(&tuple.world);
-
-	//MaterialOverride matOvr;
-	//matOvr.wireframe = GetWireframe(tuple.wireframe, wireframe);
-	//matOvr.noZCompare = tuple.noZCompare;
-
-	//global->dxr->pcEffect->Begin(device.get(), temp, matOvr);
-
-	//global->dxr->pcEffect->SetMaterial(device.get());
-
-	//tuple.render->Render();
-
-	//global->dxr->pcEffect->End(device.get());
-}
-
-//------------------------------------------------------------------------------
-void DX11Render::RenderBackground()
-{
-//	device->immDevCtx->ClearState();
-//
-//	device->RestoreRenderTarget();
-//
-//	device->immDevCtx->VSSetShader(global->dxr->quadVS->vs, NULL, 0);
-//	device->immDevCtx->PSSetShader(global->dxr->quadPS->ps, NULL, 0);
-//#if (!SHOW_PRELIT)
-//	device->SetTexture(0, "Textures/background.dds");
-//#else
-//	DX11Mesh& mesh = *global->dxr->mesh[0].get();
-//	device->immDevCtx->PSSetShaderResources(0, 1, &mesh.litResult->srv);
-//#endif
-//
-//	device->immDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//	device->immDevCtx->Draw(3, 0);
 }
 

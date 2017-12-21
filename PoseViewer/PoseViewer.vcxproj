@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MmdBoneRenderer.cpp" />
     <ClCompile Include="MmdPlayer.cpp" />
     <ClCompile Include="MmdRenderer.cpp" />
     <ClCompile Include="OpenPose.cpp" />
@@ -134,6 +135,7 @@
     <ClCompile Include="SceneDescriptor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MmdBoneRenderer.h" />
     <ClInclude Include="MmdPlayer.h" />
     <ClInclude Include="MmdRenderer.h" />
     <ClInclude Include="Pmd.h" />
@@ -159,6 +161,10 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Mmd.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\OpenPose.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

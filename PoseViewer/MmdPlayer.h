@@ -2,6 +2,8 @@
 
 #include <DirectXMath.h>
 
+#include "pmd.h"
+
 class IMmdPlayer {
 public:
 	virtual ~IMmdPlayer();
@@ -11,6 +13,9 @@ public:
 
 	virtual const uint16_t* GetIndices() const = 0;
 	virtual int GetIndicesCount() const = 0;
+
+	virtual const DirectX::XMMATRIX* GetWorldTransform() const = 0;
+	virtual int GetWorldTransformCount() const = 0;
 
 	virtual void Load() = 0;
 

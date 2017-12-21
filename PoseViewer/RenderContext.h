@@ -2,6 +2,9 @@
 
 #include <memory>
 
+#include <SpriteBatch.h>
+#include <SpriteFont.h>
+
 #include <DX11Device.h>
 #include <ShaderManager.h>
 

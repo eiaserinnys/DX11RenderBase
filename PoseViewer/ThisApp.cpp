@@ -14,6 +14,7 @@
 
 #include "MmdPlayer.h"
 #include "MmdRenderer.h"
+#include "MmdBoneRenderer.h"
 
 using namespace std;
 using namespace DirectX;
@@ -24,6 +25,7 @@ public:
 	unique_ptr<IOpenPoseRenderer> openPoseRender;
 	unique_ptr<IMmdPlayer> mmdPlayer;
 	unique_ptr<IMmdRenderer> mmdRender;
+	unique_ptr<IMmdBoneRenderer> mmdBoneRender;
 	unique_ptr<DX11Render> render;
 	HWND hWnd;
 
@@ -44,6 +46,7 @@ public:
 		render.reset(new DX11Render(hWnd, global->d3d11.get()));
 		openPoseRender.reset(IOpenPoseRenderer::Create(global.get()));
 		mmdRender.reset(IMmdRenderer::Create(global.get()));
+		mmdBoneRender.reset(IMmdBoneRenderer::Create(global.get()));
 
 		Load();
 	}
@@ -228,11 +231,6 @@ public:
 		SceneDescriptor sceneDesc;
 
 		XMMATRIX rot = XMMatrixIdentity();
-		{
-			float dist = 0.75f;
-			sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
-			openPoseRender->Render(frames[cur], sceneDesc);
-		}
 
 		{
 			mmdPlayer->Update();
@@ -241,10 +239,19 @@ public:
 			float dist = 5.0f;
 			sceneDesc.Build(
 				hWnd, 
-				XMFLOAT3(0, 0, 3), 
-				XMFLOAT3(0, 0.5f, 0), 
+				XMFLOAT3(0.5f, 0, 3), 
+				XMFLOAT3(0.5f, 0.5f, 0), 
 				rot);
 			mmdRender->Render(mmdPlayer.get(), sceneDesc);
+			mmdBoneRender->Render(render.get(), mmdPlayer.get(), sceneDesc);
+
+			render->RenderText(sceneDesc.worldViewProj);
+		}
+
+		{
+			float dist = 0.75f;
+			sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
+			openPoseRender->Render(frames[cur], sceneDesc);
 		}
 
 		if (advance)

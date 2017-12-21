@@ -56,6 +56,9 @@
     <ClCompile Include="MmdPlayer.cpp">
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClCompile>
+    <ClCompile Include="MmdBoneRenderer.cpp">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -91,10 +94,16 @@
     <ClInclude Include="MmdPlayer.h">
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
+    <ClInclude Include="MmdBoneRenderer.h">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Mmd.fx">
       <Filter>소스 파일\ThisApp\MMD</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\OpenPose.fx">
+      <Filter>소스 파일\ThisApp\OpenPose</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

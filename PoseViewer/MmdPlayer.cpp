@@ -26,6 +26,8 @@ public:
 
 	vector<vector<vmd::VmdBoneFrame>*> frames;
 
+	vector<XMMATRIX> worldTx;
+
 	int pivotTime = 0;
 	int curFrame = 0;
 	int lastFrame = 0;
@@ -35,6 +37,9 @@ public:
 
 	const uint16_t* GetIndices() const { return indices.empty() ? nullptr : &indices[0]; }
 	int GetIndicesCount() const { return (int)indices.size(); }
+
+	virtual const DirectX::XMMATRIX* GetWorldTransform() const { return worldTx.empty() ? nullptr : &worldTx[0]; }
+	virtual int GetWorldTransformCount() const { return worldTx.size(); }
 
 	~MmdPlayer()
 	{
@@ -410,10 +415,7 @@ public:
 		if (pivotTime == 0) { pivotTime = timeGetTime(); }
 
 		auto elapsedSec = (timeGetTime() - pivotTime) / 1000.0;
-		//frame = (int) (elapsedSec * 10);
-
-		curFrame++;
-		frame = curFrame;
+		frame = (int) (elapsedSec * 30);
 
 		// ·ÎÄÃ Æ®·£½ºÆûÀ» ºôµå
 		vector<XMMATRIX> localTx;
@@ -425,7 +427,8 @@ public:
 
 			localTx[i] = XMMatrixIdentity();
 
-			if (frames[i] == nullptr) 
+			//if (frames[i] == nullptr) 
+			if (true)
 			{
 				//bone.rotation[0] = 0.0;
 				//bone.rotation[1] = 0.0;
@@ -475,7 +478,6 @@ public:
 		}
 
 		// ¿ùµå Æ®·£½ºÆûÀ» ºôµå
-		vector<XMMATRIX> worldTx;
 		worldTx.resize(model->bones.size());
 
 		for (size_t i = 0; i < model->bones.size(); ++i)

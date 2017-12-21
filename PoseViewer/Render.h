@@ -72,7 +72,7 @@ struct TextToRender
 		const DirectX::XMFLOAT3& p,
 		const std::wstring& t,
 		const DirectX::XMFLOAT4& c)
-		: pos(p), is3d(true), text(t), clr(c) {}
+		: pos(p), ofs(0, 0), is3d(true), text(t), clr(c) {}
 
 	TextToRender(
 		const DirectX::XMFLOAT3& p,
@@ -110,15 +110,16 @@ struct DX11Render
 	void* operator new(std::size_t size) { return _aligned_malloc(size, 16); }
 	void operator delete(void* ptr) { return _aligned_free(ptr); }
 
-private:
-	void RenderInternal(RenderTuple* tuple, int count, BakeFlag::Value bake, bool wireframe);
+	void RenderText(const TextToRender& text) { textToRender.push_back(text); }
+	void RenderText(const DirectX::XMMATRIX& wvp);
 
-	void RenderPointCloud_(RenderTuple& tuple, bool wireframe);
-	void RenderBackground();
+private:
 
 public:
 	DX11Device* device = nullptr;
-	SceneDescriptor sceneDesc;
 	HWND hwnd;
 	std::list<TextToRender> textToRender;
+
+	std::unique_ptr<DirectX::SpriteBatch> spriteBatch;
+	std::unique_ptr<DirectX::SpriteFont> font;
 };
