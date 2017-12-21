@@ -67,6 +67,9 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Manager\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="ArcBall.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -103,6 +106,9 @@
       <Filter>Manager\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcBall.h">
       <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>

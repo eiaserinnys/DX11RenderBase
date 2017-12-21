@@ -143,10 +143,16 @@ public:
 			11,		// 上半身
 			12,		// 上半身2
 			14,		// 首
-			16,		// 右肩P
-			17,		// 右肩
-			18,		// 右肩C
+			//16,		// 右肩P
 			19,		// 右腕
+			26,		// 右ひじ
+			36,		// 左腕
+			43,		// 左ひじ
+			56,		// 右足
+			57,		// 右ひざ
+			60,		// 左足
+			61,		// 左ひざ
+			214,
 		};
 		
 		toRender.insert(toRenderList, toRenderList + COUNT_OF(toRenderList));
@@ -163,7 +169,8 @@ public:
 			pivot = pivot / 20;
 
 			render->RenderText(
-				TextToRender(pivot, Utility::FormatW(L"%d", i), XMFLOAT4(1, 1, 1, 1)));
+				TextToRender(pivot, Utility::FormatW(L"%d", i), 
+					XMFLOAT4(0, 0, 0, 1)));
 
 			ind.push_back((uint16_t)pos.size());
 			ind.push_back((uint16_t)pos.size() + 1);

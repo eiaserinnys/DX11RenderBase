@@ -7,11 +7,14 @@
 
 #include "OpenPose.h"
 
+class DX11Render;
+
 class IOpenPoseRenderer {
 public:
 	virtual ~IOpenPoseRenderer();
 
 	virtual void Render(
+		DX11Render* render,
 		const OpenPose::Frame& frame,
 		const SceneDescriptor& sceneDesc) = 0;
 

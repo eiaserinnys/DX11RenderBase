@@ -37,6 +37,6 @@ PS_INPUT VS( VS_INPUT input )
 //-----------------------------------------------------------------------------
 float4 PS(PS_INPUT input) : SV_Target
 {
-	return float4(1, 1, 1, 0.1f);
+	return float4(0, 0, 0, 0.1f);
 }
 

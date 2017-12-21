@@ -325,7 +325,8 @@ void DX11Device::RestoreRenderTarget()
 
 void DX11Device::ClearRenderTarget()
 {
-	float ClearColor[4] = { 0.25f, 0.25f, 0.25f, 0.0f }; // red, green, blue, alpha
+	//float ClearColor[4] = { 0.25f, 0.25f, 0.25f, 0.0f }; // red, green, blue, alpha
+	float ClearColor[4] = { 1, 1, 1, 0.0f }; // red, green, blue, alpha
 
 	switch (rtType) {
 	case RenderTarget::ForUnwrap:

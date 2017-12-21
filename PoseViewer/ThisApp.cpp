@@ -5,6 +5,7 @@
 
 #include <WindowsUtility.h>
 #include <Utility.h>
+#include <ArcBall.h>
 
 #include "RenderContext.h"
 #include "Render.h"
@@ -29,6 +30,8 @@ public:
 	unique_ptr<DX11Render> render;
 	HWND hWnd;
 
+	unique_ptr<IArcBall> arcBall;
+
 	vector<OpenPose::Frame> frames;
 	int cur = 0;
 
@@ -36,6 +39,8 @@ public:
 	int pivotTime = 0;
 
 	XMFLOAT3 com;
+
+	OpenPose::Frame refFrame;
 
 	bool init = false;
 
@@ -48,6 +53,8 @@ public:
 		mmdRender.reset(IMmdRenderer::Create(global.get()));
 		mmdBoneRender.reset(IMmdBoneRenderer::Create(global.get()));
 
+		arcBall.reset(IArcBall::Create());
+
 		Load();
 	}
 
@@ -56,6 +63,18 @@ public:
 		mmdPlayer.reset(IMmdPlayer::Create());
 		mmdPlayer->Load();
 
+		// 레퍼런스 포즈를 로드한다
+		{
+			OpenPose::Frame refFrame;
+
+			OpenPose::Load("Pose/miku_keypoints.json", refFrame);
+
+			com = refFrame.com;
+
+			frames.push_back(refFrame);
+		}
+
+#if 0
 		// 오픈포즈를 로드해본다
 		com = XMFLOAT3(0, 0, 0);
 
@@ -94,6 +113,7 @@ public:
 		}
 
 		com = com / (float) frames.size();
+#endif
 
 #if 0
 		// 일단 막 vmd를 만들어보자
@@ -117,102 +137,6 @@ public:
 #endif
 	}
 
-#if 0
-	XMMATRIX GetPose(
-		OpenPose::Frame& f,
-		int pivot,
-		int next,
-		int ref)
-	{
-		XMFLOAT3 front = f.pos[next] - f.pos[pivot];
-		XMFLOAT3 left_ = f.pos[ref] - f.pos[pivot];
-		XMFLOAT3 up = Cross(front, left_);
-		XMFLOAT3 left = Cross(up, front);
-
-		XMMATRIX bone = XMMatrixIdentity();
-		if (Length(front) == 0 || Length(left) == 0 || Length(up) == 0)
-		{
-			bone = XMMatrixIdentity();
-		}
-		else
-		{
-			Normalize(front);
-			Normalize(left);
-			Normalize(up);
-
-			bone.r[0].m128_f32[0] = front.x;
-			bone.r[0].m128_f32[1] = front.y;
-			bone.r[0].m128_f32[2] = front.z;
-
-			bone.r[1].m128_f32[0] = left.x;
-			bone.r[1].m128_f32[1] = left.y;
-			bone.r[1].m128_f32[2] = left.z;
-
-			bone.r[2].m128_f32[0] = up.x;
-			bone.r[2].m128_f32[1] = up.y;
-			bone.r[2].m128_f32[2] = up.z;
-
-			//bone = XMMatrixLookAtLH(
-			//	XMLoadFloat3(&f.pos[pivot]),
-			//	XMLoadFloat3(&f.pos[next]),
-			//	XMLoadFloat3(&up));
-		}
-
-		return bone;
-	}
-
-	XMMATRIX AddBone(
-		vmd::VmdMotion* vmdMotion,
-		vmd::VmdMotion* vmdMotionOut,
-		OpenPose::Frame& f,
-		int fi, 
-		const wstring& name,
-		int pivot, 
-		int next, 
-		int ref, 
-		const XMMATRIX& parent)
-	{
-		vmd::VmdBoneFrame vf;
-		vf.name = vmd::utf82sjis(name);
-		vf.frame = fi;
-		vf.position[0] = 0;
-		vf.position[1] = 0;
-		vf.position[2] = 0;
-
-		XMMATRIX bone = GetPose(f, pivot, next, ref);
-
-		XMMATRIX invPar = XMMatrixInverse(nullptr, parent);
-		auto local = XMMatrixMultiply(invPar, bone);
-
-		XMVECTOR quat = XMQuaternionRotationMatrix(local);
-
-		vf.orientation[0] = quat.m128_f32[0];
-		vf.orientation[1] = quat.m128_f32[1];
-		vf.orientation[2] = quat.m128_f32[2];
-		vf.orientation[3] = quat.m128_f32[3];
-
-		memcpy(
-			vf.interpolation,
-			&vmdMotion->bone_frames[0].interpolation,
-			sizeof(char) * 4 * 4 * 4);
-
-		vmdMotionOut->bone_frames.push_back(vf);
-
-		return bone;
-	}
-
-	void AddFrame(
-		vmd::VmdMotion* vmdMotion,
-		vmd::VmdMotion* vmdMotionOut,
-		OpenPose::Frame& f,
-		int fi)
-	{
-		XMMATRIX base = GetPose(f, 1, 8, 11);
-		XMMATRIX rs = AddBone(vmdMotion, vmdMotionOut, f, fi, L"右肩", 2, 3, 1, base);
-		AddBone(vmdMotion, vmdMotionOut, f, fi, L"右ひじ", 3, 4, 1, rs);
-	}
-#endif
-
 	~ThisApp()
 	{
 		CleanUp();
@@ -224,13 +148,15 @@ public:
 		global.reset(NULL);
 	}
 
+	IArcBall* GetArcBall() { return arcBall.get(); }
+
 	virtual void Do()
 	{
 		render->Begin();
 
 		SceneDescriptor sceneDesc;
 
-		XMMATRIX rot = XMMatrixIdentity();
+		XMMATRIX rot = arcBall->GetRotationMatrix();
 
 		{
 			mmdPlayer->Update();
@@ -239,7 +165,7 @@ public:
 			float dist = 5.0f;
 			sceneDesc.Build(
 				hWnd, 
-				XMFLOAT3(0.5f, 0, 3), 
+				XMFLOAT3(0.5f, 0.5, -3), 
 				XMFLOAT3(0.5f, 0.5f, 0), 
 				rot);
 			mmdRender->Render(mmdPlayer.get(), sceneDesc);
@@ -249,9 +175,11 @@ public:
 		}
 
 		{
-			float dist = 0.75f;
-			sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
-			openPoseRender->Render(frames[cur], sceneDesc);
+			float dist = 2.0f;
+			sceneDesc.Build(hWnd, com + XMFLOAT3(0, 0, -dist), com, rot);
+			openPoseRender->Render(render.get(), frames[cur], sceneDesc);
+
+			render->RenderText(sceneDesc.worldViewProj);
 		}
 
 		if (advance)

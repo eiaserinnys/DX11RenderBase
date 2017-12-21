@@ -9,6 +9,7 @@
 #include <d3dcompiler.h>
 
 #include <WindowsUtility.h>
+#include <ArcBall.h>
 
 #include "ThisApp.h"
 
@@ -29,6 +30,12 @@ LRESULT CALLBACK WndProc(
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
+
+	if (thisApp.get() != nullptr)
+	{
+		auto result = thisApp->GetArcBall()->HandleMessages(hWnd, message, wParam, lParam);
+		if (result) { return result; }
+	}
 
 	switch (message)
 	{

@@ -117,9 +117,12 @@ public:
 				auto& b = model->bones[i];
 
 				WindowsUtility::Debug(
-					L"[%03d] %s",
-					i, 
-					b.bone_name.c_str());
+					L"[%03d] %s (%f,%f,%f)",
+					i,
+					b.bone_name.c_str(),
+					b.position[0],
+					b.position[1],
+					b.position[2]);
 
 				if (b.parent_index >= 0)
 				{

@@ -76,7 +76,7 @@ public:
 		{
 			D3D11_RASTERIZER_DESC rsDesc;
 			IDX11RasterizerState::DefaultDesc(rsDesc);
-			rsDesc.FillMode = D3D11_FILL_WIREFRAME;
+			//rsDesc.FillMode = D3D11_FILL_WIREFRAME;
 			rasterState.reset(IDX11RasterizerState::Create(d3dDev, rsDesc));
 
 			D3D11_DEPTH_STENCIL_DESC dsDesc;

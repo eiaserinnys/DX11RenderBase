@@ -9,6 +9,8 @@
 
 #include <Utility.h>
 
+#include "Render.h"
+
 #include "SceneDescriptor.h"
 
 using namespace std;
@@ -139,9 +141,18 @@ public:
 
 	//--------------------------------------------------------------------------
 	void Render(
+		DX11Render* render,
 		const OpenPose::Frame& frame,
 		const SceneDescriptor& sceneDesc)
 	{
+		for (int i = 0; i < COUNT_OF(frame.pos); ++i)
+		{
+			render->RenderText(TextToRender(
+				frame.pos[i],
+				Utility::FormatW(L"%d", i),
+				XMFLOAT4(0, 0, 0, 1)));
+		}
+
 		pos->UpdateDiscard(
 			context->d3d11->immDevCtx, 
 			&frame.pos, 

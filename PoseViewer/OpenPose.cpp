@@ -11,6 +11,13 @@ using namespace std;
 using namespace rapidjson;
 using namespace DirectX;
 
+void OpenPose::Frame::CalculateTx()
+{
+	worldTx.resize(COUNT_OF(pos));
+
+
+}
+
 class OpenPose_ {
 public:
 	OpenPose::Frame frame;
@@ -94,9 +101,9 @@ public:
 			{
 				float scale = 1000.0f;
 
-				frame.pos[offset].x = k->GetFloat() / scale; k++;
-				frame.pos[offset].z = - k->GetFloat() / scale; k++;
-				frame.pos[offset].y = k->GetFloat() / scale; k++;
+				frame.pos[offset].x = - k->GetFloat() / scale; k++;
+				frame.pos[offset].y = - k->GetFloat() / scale; k++;
+				frame.pos[offset].z = k->GetFloat() / scale; k++;
 
 				total = total + frame.pos[offset];
 
