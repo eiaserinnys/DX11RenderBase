@@ -36,6 +36,9 @@ public:
 	int curFrame = 0;
 	int lastFrame = 0;
 
+	virtual pmx::PmxModel* GetModel() { return model.get(); }
+	virtual vmd::VmdMotion* GetMotion() { return motion.get(); }
+
 	const XMFLOAT3* GetVertices() const { return vertices.empty() ? nullptr : &vertices[0]; }
 	int GetVerticesCount() const { return (int) vertices.size(); }
 
@@ -370,37 +373,9 @@ public:
 
 	static inline void QuatToMatrix(XMMATRIX& m_, const XMFLOAT4 &q)
 	{
-		float* m = (float*) &m_;
-
-		double x2 = q.x * q.x * 2.0f;
-		double y2 = q.y * q.y * 2.0f;
-		double z2 = q.z * q.z * 2.0f;
-		double xy = q.x * q.y * 2.0f;
-		double yz = q.y * q.z * 2.0f;
-		double zx = q.z * q.x * 2.0f;
-		double xw = q.x * q.w * 2.0f;
-		double yw = q.y * q.w * 2.0f;
-		double zw = q.z * q.w * 2.0f;
-
-		m[0] = (float)(1.0f - y2 - z2);
-		m[1] = (float)(xy + zw);
-		m[2] = (float)(zx - yw);
-		m[3] = 0.0f;
-
-		m[4] = (float)(xy - zw);
-		m[5] = (float)(1.0f - z2 - x2);
-		m[6] = (float)(yz + xw);
-		m[7] = 0.0f;
-
-		m[8] = (float)(zx + yw);
-		m[9] = (float)(yz - xw);
-		m[10] = (float)(1.0f - x2 - y2);
-		m[11] = 0.0f;
-
-		m[12] = 0.0f;
-		m[13] = 0.0f;
-		m[14] = 0.0f;
-		m[15] = 1.0f;
+		// test
+		XMVECTOR quat = XMLoadFloat4(&q);
+		m_ = XMMatrixRotationQuaternion(quat);
 	}
 
 	static void InterpolateMotion(
@@ -469,7 +444,7 @@ public:
 	}
 
 #if USE_PMX
-	void Update(OpenPose::Frame& opf)
+	void Update(OpenPose::Frame& opf, OpenPose::Frame& firstOpf)
 	{
 		int frame = 0;
 
@@ -495,6 +470,38 @@ public:
 				//bone.rotation[1] = 0.0;
 				//bone.rotation[2] = 0.0;
 				//bone.rotation[3] = 1.0;
+
+				XMFLOAT4 motionRot(0, 0, 0, 1);
+
+				if (i == 4) { motionRot = opf.comQuat; }
+
+				if (i == 36) { motionRot = opf.quat[2]; }
+				if (i == 43) { motionRot = opf.quat[3]; }
+				if (i == 19) { motionRot = opf.quat[5]; }
+				if (i == 26) { motionRot = opf.quat[6]; }
+
+				if (i == 69) { motionRot = opf.quat[8]; }
+				if (i == 70) { motionRot = opf.quat[9]; }
+				if (i == 65) { motionRot = opf.quat[11]; }
+				if (i == 66) { motionRot = opf.quat[12]; }
+
+				float motionPos[3] = { 0, 0, 0 };
+				QuatToMatrix(localTx[i], motionRot);
+
+				if (bone.parent_index < 0)
+				{
+					localTx[i].r[3].m128_f32[0] = bone.position[0] + motionPos[0];
+					localTx[i].r[3].m128_f32[1] = bone.position[1] + motionPos[1];
+					localTx[i].r[3].m128_f32[2] = bone.position[2] + motionPos[2];
+				}
+				else
+				{
+					auto& parent = model->bones[bone.parent_index];
+
+					localTx[i].r[3].m128_f32[0] = (bone.position[0] - parent.position[0]) + motionPos[0];
+					localTx[i].r[3].m128_f32[1] = (bone.position[1] - parent.position[1]) + motionPos[1];
+					localTx[i].r[3].m128_f32[2] = (bone.position[2] - parent.position[2]) + motionPos[2];
+				}
 
 				if (bone.parent_index < 0)
 				{
@@ -538,18 +545,14 @@ public:
 			}
 		}
 
+#if 1
 		// com을 일단 복사해보자!
-		localTx[4].r[0].m128_f32[0] = opf.comTx.r[0].m128_f32[0];
-		localTx[4].r[0].m128_f32[1] = opf.comTx.r[0].m128_f32[1];
-		localTx[4].r[0].m128_f32[2] = opf.comTx.r[0].m128_f32[2];
+		float comScale = 50.0f;
 
-		localTx[4].r[1].m128_f32[0] = opf.comTx.r[1].m128_f32[0];
-		localTx[4].r[1].m128_f32[1] = opf.comTx.r[1].m128_f32[1];
-		localTx[4].r[1].m128_f32[2] = opf.comTx.r[1].m128_f32[2];
-
-		localTx[4].r[2].m128_f32[0] = opf.comTx.r[2].m128_f32[0];
-		localTx[4].r[2].m128_f32[1] = opf.comTx.r[2].m128_f32[1];
-		localTx[4].r[2].m128_f32[2] = opf.comTx.r[2].m128_f32[2];
+		localTx[4].r[3].m128_f32[0] = (opf.com.x - firstOpf.com.x) * comScale;
+		localTx[4].r[3].m128_f32[1] = (opf.com.y - firstOpf.com.y) * comScale;
+		localTx[4].r[3].m128_f32[2] = (opf.com.z - firstOpf.com.z) * comScale;
+#endif
 
 		// 월드 트랜스폼을 빌드
 		worldTx.resize(model->bone_count);
@@ -565,9 +568,9 @@ public:
 			else
 			{
 				MatMul(
-					(float*)&worldTx[i],
-					(float*)&worldTx[bone.parent_index],
-					(float*)&localTx[i]);
+					worldTx[i],
+					worldTx[bone.parent_index],
+					localTx[i]);
 			}
 		}
 
@@ -793,27 +796,24 @@ public:
 	}
 #endif
 
-	static void MatMul(float dst[16], float m0[16], float m1[16])
+	static void MatMul(XMMATRIX& dst, const XMMATRIX& m0, const XMMATRIX& m1)
 	{
-		for (int i = 0; i < 4; ++i)
-		{
-			for (int j = 0; j < 4; ++j)
-			{
-				dst[4 * i + j] = 0;
-				for (int k = 0; k < 4; ++k)
-				{
-					dst[4 * i + j] += m0[4 * k + j] * m1[4 * i + k];
-				}
-			}
-		}
+		dst = XMMatrixMultiply(m1, m0);
 	}
 
 	static void MatVMul(XMFLOAT3& w, const XMMATRIX& m_, const XMFLOAT3& v)
 	{
+#if 0
 		const float* m = (const float*)&m_;
 		w.x = m[0] * v.x + m[4] * v.y + m[8] * v.z + m[12];
 		w.y = m[1] * v.x + m[5] * v.y + m[9] * v.z + m[13];
 		w.z = m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14];
+#endif
+
+		XMVECTOR v_ = XMLoadFloat3(&v);
+		XMVECTOR t = XMVector3Transform(v_, m_);
+
+		w = XMFLOAT3(t.m128_f32[0], t.m128_f32[1], t.m128_f32[2]);
 	}
 };
 

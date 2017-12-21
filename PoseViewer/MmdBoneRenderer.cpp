@@ -168,9 +168,9 @@ public:
 
 			pivot = pivot / 20;
 
-			render->RenderText(
-				TextToRender(pivot, Utility::FormatW(L"%d", i), 
-					XMFLOAT4(0, 0, 0, 1)));
+			//render->RenderText(
+			//	TextToRender(pivot, Utility::FormatW(L"%d", i), 
+			//		XMFLOAT4(0, 0, 0, 1)));
 
 			ind.push_back((uint16_t)pos.size());
 			ind.push_back((uint16_t)pos.size() + 1);

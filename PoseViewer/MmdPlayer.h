@@ -2,7 +2,8 @@
 
 #include <DirectXMath.h>
 
-#include "pmd.h"
+#include "pmx.h"
+#include "vmd.h"
 #include "OpenPose.h"
 
 class IMmdPlayer {
@@ -20,7 +21,10 @@ public:
 
 	virtual void Load() = 0;
 
-	virtual void Update(OpenPose::Frame& frame) = 0;
+	virtual void Update(OpenPose::Frame& frame, OpenPose::Frame& firstFrame) = 0;
+
+	virtual pmx::PmxModel* GetModel() = 0;
+	virtual vmd::VmdMotion* GetMotion() = 0;
 
 	static IMmdPlayer* Create();
 };

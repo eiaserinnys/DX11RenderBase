@@ -13,6 +13,7 @@
 #include "OpenPose.h"
 #include "OpenPoseRenderer.h"
 
+#include "vmd.h"
 #include "MmdPlayer.h"
 #include "MmdRenderer.h"
 #include "MmdBoneRenderer.h"
@@ -67,19 +68,6 @@ public:
 		// 레퍼런스 포즈를 로드한다
 		OpenPose::Load("Pose/miku_keypoints.json", refFrame);
 		com = refFrame.com;
-		refFrame.CalculateLink();
-
-		{
-			if (!refFrame.worldTx.empty())
-			{
-				for (int i = 0; i < COUNT_OF(refFrame.pos); ++i)
-				{
-					refFrame.worldTx[i] = XMMatrixMultiply(
-						refFrame.worldInvTx[i], 
-						refFrame.worldTx[i]);
-				}
-			}
-		}
 
 		//frames.push_back(refFrame);
 
@@ -97,7 +85,7 @@ public:
 
 				OpenPose::Frame frame;
 
-				OpenPose::Load(fileName, frame);
+				OpenPose::Load(fileName, frame, refFrame);
 
 				for (int i = 0; i < COUNT_OF(frame.pos); ++i)
 				{
@@ -110,20 +98,9 @@ public:
 					}
 				}
 
-				// 레퍼런스의 인버스를 곱하자!
-				if (!frame.worldTx.empty())
-				{
-					for (int i = 0; i < COUNT_OF(frame.pos); ++i)
-					{
-						frame.worldTx[i] = XMMatrixMultiply(
-							refFrame.worldInvTx[i], 
-							frame.worldTx[i]);
-					}
-				}
-
 				frames.push_back(frame);
 
-				WindowsUtility::Debug(L"%d, %f,%f,%f\n", i, frame.com.x, frame.com.y, frame.com.z);
+				//WindowsUtility::Debug(L"%d, %f,%f,%f\n", i, frame.com.x, frame.com.y, frame.com.z);
 
 				com = com + frame.com;
 			}
@@ -137,7 +114,6 @@ public:
 		com = com / (float) frames.size();
 #endif
 
-#if 0
 		// 일단 막 vmd를 만들어보자
 		unique_ptr<vmd::VmdMotion> vmdMotionOut;
 		{
@@ -146,17 +122,89 @@ public:
 			vmdMotionOut->model_name = vmd::utf82sjis(L"初音ミク");
 			vmdMotionOut->version = 2;
 
-			int fi =  0;
-			for (auto f : frames)
+			auto model = mmdPlayer->GetModel();
+			auto motion = mmdPlayer->GetMotion();
+
+			for (int i = 0; i < frames.size(); ++i)
 			{
-				AddFrame(vmdMotion.get(), vmdMotionOut.get(), f, fi);
-				fi += 5;
+				auto& f = frames[i];
+
+				auto& writeRotation = [&](vmd::VmdBoneFrame& bf, int mi, XMFLOAT4& quat)
+				{
+					bf.frame = i;
+
+					memcpy(
+						bf.interpolation,
+						motion->bone_frames[0].interpolation,
+						sizeof(char) * 4 * 4 * 4);
+
+					bf.name = vmd::utf82sjis(model->bones[mi].bone_name);
+
+					bf.orientation[0] = quat.x;
+					bf.orientation[1] = quat.y;
+					bf.orientation[2] = quat.z;
+					bf.orientation[3] = quat.w;
+
+					bf.position[0] = 0;
+					bf.position[1] = 0;
+					bf.position[2] = 0;
+				};
+
+				{
+					vmd::VmdBoneFrame bf;
+
+					writeRotation(bf, 4, f.comQuat);
+
+					auto move = f.com - frames[0].com;
+					float scale = 100;
+
+					bf.position[0] = move.x * scale;
+					bf.position[1] = move.y * scale;
+					bf.position[2] = move.z * scale;
+
+					vmdMotionOut->bone_frames.push_back(bf);
+				}
+
+				vmd::VmdBoneFrame bf;
+
+				//if (i == 36) { motionRot = opf.quat[2]; }
+				//if (i == 43) { motionRot = opf.quat[3]; }
+				//if (i == 19) { motionRot = opf.quat[5]; }
+				//if (i == 26) { motionRot = opf.quat[6]; }
+
+				//if (i == 69) { motionRot = opf.quat[8]; }
+				//if (i == 70) { motionRot = opf.quat[9]; }
+				//if (i == 65) { motionRot = opf.quat[11]; }
+				//if (i == 66) { motionRot = opf.quat[12]; }
+
+				writeRotation(bf, 36, f.quat[2]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 43, f.quat[3]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 19, f.quat[5]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 26, f.quat[6]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 69, f.quat[8]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 70, f.quat[9]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 65, f.quat[11]);
+				vmdMotionOut->bone_frames.push_back(bf);
+
+				writeRotation(bf, 66, f.quat[12]);
+				vmdMotionOut->bone_frames.push_back(bf);
 			}
 		}
 
 		vmdMotionOut->SaveToFile(
 			L"D:\\__Development__\\MikuMikuDanceE_v931x64\\UserFile\\Motion\\RedFlavor.vmd");
-#endif
 	}
 
 	~ThisApp()
@@ -182,24 +230,25 @@ public:
 
 		{
 			float dist = 1.0f;
-			sceneDesc.Build(hWnd, com + XMFLOAT3(0, 0, -dist), com, rot);
+			XMFLOAT3 ofs = XMFLOAT3(0.5, 0, -0.1f);
+			sceneDesc.Build(hWnd, com + XMFLOAT3(0.5, 0, -dist) + ofs, com + ofs, rot);
 			openPoseRender->Render(render.get(), frames[cur], sceneDesc);
 
 			render->RenderText(sceneDesc.worldViewProj);
 		}
 
 		{
-			mmdPlayer->Update(frames[cur]);
+			mmdPlayer->Update(frames[cur], frames[0]);
 
 			XMFLOAT3 ofs(0, 0, 0);
 			float dist = 5.0f;
 			sceneDesc.Build(
 				hWnd, 
-				XMFLOAT3(0.5f, 0.5, -3), 
-				XMFLOAT3(0.5f, 0.5f, 0), 
+				XMFLOAT3(0.f, 0.3, -3), 
+				XMFLOAT3(0.f, 0.3f, 0), 
 				rot);
 			mmdRender->Render(mmdPlayer.get(), sceneDesc);
-			mmdBoneRender->Render(render.get(), mmdPlayer.get(), sceneDesc);
+			//mmdBoneRender->Render(render.get(), mmdPlayer.get(), sceneDesc);
 
 			render->RenderText(sceneDesc.worldViewProj);
 		}
@@ -218,7 +267,7 @@ public:
 
 			totalAdvance += curAdv;
 
-			cur = (int)(totalAdvance / 1000.0f * 30 / 2) ;
+			cur = (int)(totalAdvance / 1000.0f * 30) ;
 			cur = cur % frames.size();
 		}
 

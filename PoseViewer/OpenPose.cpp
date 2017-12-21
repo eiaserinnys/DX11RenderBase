@@ -160,7 +160,7 @@ void OpenPose::Frame::CalculateCom()
 	int upBone = 1;
 	XMFLOAT3 left = pos[leftBone] - pos[pivotBone];
 	left = Normalize(left);
-	XMFLOAT3 up_ = pos[upBone] - pos[pivotBone];
+	XMFLOAT3 up_ = XMFLOAT3(0, 1, 0);//pos[upBone] - pos[pivotBone];
 	up_ = Normalize(up_);
 	XMFLOAT3 front = Cross(left, up_);
 	XMFLOAT3 up = Cross(left, front);
@@ -277,8 +277,6 @@ public:
 			}
 
 			//frame.com = total / (float) (pose.Size() / 3);
-
-			frame.CalculateTx();
 		}
 	}
 };
@@ -288,5 +286,72 @@ void OpenPose::Load(const string& fileName, Frame& frame)
 	OpenPose_ pose(fileName);
 
 	frame = pose.frame;
+
+	frame.CalculateTx();
+
+	frame.CalculateLink();
+
+	for (int i = 0; i < COUNT_OF(frame.pos); ++i)
+	{
+		frame.worldTx[i] = XMMatrixMultiply(
+			frame.worldInvTx[i],
+			frame.worldTx[i]);
+	}
+}
+
+void OpenPose::Load(const string& fileName, Frame& frame, const Frame& refFrame)
+{
+	OpenPose_ pose(fileName);
+
+	frame = pose.frame;
+
+	frame.CalculateTx();
+
+	// 레퍼런스의 인버스를 곱하자!
+	for (int i = 0; i < COUNT_OF(frame.pos); ++i)
+	{
+		frame.worldTx[i] = XMMatrixMultiply(
+			refFrame.worldInvTx[i],
+			frame.worldTx[i]);
+	}
+
+	XMMATRIX id = XMMatrixIdentity();
+
+	vector<XMMATRIX> localTx;
+	localTx.resize(frame.worldTx.size(), id);
+
+	frame.quat.resize(frame.worldTx.size(), XMFLOAT4(0, 0, 0, 1));
+
+	auto& calcLocal = [&](int pivot, const XMMATRIX& parTx)
+	{
+		localTx[pivot] = XMMatrixMultiply(
+			frame.worldTx[pivot], 
+			XMMatrixInverse(nullptr, parTx));
+
+		auto v = XMQuaternionRotationMatrix(localTx[pivot]);
+
+		frame.quat[pivot].x = v.m128_f32[0];
+		frame.quat[pivot].y = v.m128_f32[1];
+		frame.quat[pivot].z = v.m128_f32[2];
+		frame.quat[pivot].w = v.m128_f32[3];
+	};
+
+	calcLocal(2, frame.comTx);
+	calcLocal(3, frame.worldTx[2]);
+
+	calcLocal(5, frame.comTx);
+	calcLocal(6, frame.worldTx[5]);
+
+	calcLocal(8, frame.comTx);
+	calcLocal(9, frame.worldTx[8]);
+
+	calcLocal(11, frame.comTx);
+	calcLocal(12, frame.worldTx[11]);
+
+	auto v = XMQuaternionRotationMatrix(frame.comTx);
+	frame.comQuat.x = v.m128_f32[0];
+	frame.comQuat.y = v.m128_f32[1];
+	frame.comQuat.z = v.m128_f32[2];
+	frame.comQuat.w = v.m128_f32[3];
 }
 

@@ -164,6 +164,7 @@ DX11Device::CreateVideoTexture(
 		nullptr,
 		&texture)))
 	{
+#if 0
 		ID3D11Resource* resource;
 
 		if (SUCCEEDED(texture->QueryInterface(
@@ -180,6 +181,7 @@ DX11Device::CreateVideoTexture(
 		}
 
 		texture->Release();
+#endif
 	}
 
 	return make_pair(nullptr, nullptr);

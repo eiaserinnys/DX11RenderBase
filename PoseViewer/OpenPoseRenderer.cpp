@@ -121,10 +121,10 @@ public:
 	{
 		for (int i = 0; i < COUNT_OF(frame.pos); ++i)
 		{
-			render->RenderText(TextToRender(
-				frame.pos[i],
-				Utility::FormatW(L"%d", i),
-				XMFLOAT4(0, 0, 0, 1)));
+			//render->RenderText(TextToRender(
+			//	frame.pos[i],
+			//	Utility::FormatW(L"%d", i),
+			//	XMFLOAT4(0, 0, 0, 1)));
 		}
 
 		// https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
