@@ -12,8 +12,7 @@
 #include "OpenPose.h"
 #include "OpenPoseRenderer.h"
 
-#include "Pmd.h"
-#include "Vmd.h"
+#include "MmdPlayer.h"
 #include "MmdRenderer.h"
 
 using namespace std;
@@ -23,6 +22,7 @@ class ThisApp : public IThisApp {
 public:
 	unique_ptr<RenderContext> global;
 	unique_ptr<IOpenPoseRenderer> openPoseRender;
+	unique_ptr<IMmdPlayer> mmdPlayer;
 	unique_ptr<IMmdRenderer> mmdRender;
 	unique_ptr<DX11Render> render;
 	HWND hWnd;
@@ -34,8 +34,6 @@ public:
 	int pivotTime = 0;
 
 	XMFLOAT3 com;
-
-	unique_ptr<pmd::PmdModel> pmdModel;
 
 	bool init = false;
 
@@ -52,56 +50,8 @@ public:
 
 	void Load()
 	{
-		// PMD를 로드해본다
-		pmdModel = pmd::PmdModel::LoadFromFile("MMD/md_m.pmd");
-
-		for (size_t i = 0; i < pmdModel->bones.size(); ++i)
-		{
-			auto& b = pmdModel->bones[i];
-
-			WindowsUtility::Debug(
-				L"[%03d] %s (%d)",
-				i,
-				vmd::sjis2utf8(b.name).c_str(),
-				b.bone_type);
-
-			if (b.parent_bone_index != 0xffff)
-			{
-				WindowsUtility::Debug(
-					L" -> [%03d] %s\n",
-					b.parent_bone_index, 
-					vmd::sjis2utf8(pmdModel->bones[b.parent_bone_index].name).c_str());
-			}
-			else
-			{
-				WindowsUtility::Debug(L"\n");
-			}
-		}
-
-		// VMD를 로드해본다
-		std::ifstream is;
-		is.open("MMD/Happy Hands Meme.vmd", std::ios::in | std::ios::binary);
-
-		unique_ptr<vmd::VmdMotion> vmdMotion;
-		if (is.is_open())
-		{
-			vmdMotion = vmd::VmdMotion::LoadFromStream(&is);
-		}
-
-		for (auto frame : vmdMotion->bone_frames)
-		{
-			WindowsUtility::Debug(
-				L"%d %s %f,%f,%f %f,%f,%f,%f\n", 
-				frame.frame,
-				frame.wname.c_str(),
-				frame.position[0], 
-				frame.position[1],
-				frame.position[2],
-				frame.orientation[0], 
-				frame.orientation[1], 
-				frame.orientation[2], 
-				frame.orientation[3]);
-		}
+		mmdPlayer.reset(IMmdPlayer::Create());
+		mmdPlayer->Load();
 
 		// 오픈포즈를 로드해본다
 		com = XMFLOAT3(0, 0, 0);
@@ -142,6 +92,7 @@ public:
 
 		com = com / (float) frames.size();
 
+#if 0
 		// 일단 막 vmd를 만들어보자
 		unique_ptr<vmd::VmdMotion> vmdMotionOut;
 		{
@@ -160,8 +111,10 @@ public:
 
 		vmdMotionOut->SaveToFile(
 			L"D:\\__Development__\\MikuMikuDanceE_v931x64\\UserFile\\Motion\\RedFlavor.vmd");
+#endif
 	}
 
+#if 0
 	XMMATRIX GetPose(
 		OpenPose::Frame& f,
 		int pivot,
@@ -255,6 +208,7 @@ public:
 		XMMATRIX rs = AddBone(vmdMotion, vmdMotionOut, f, fi, L"右肩", 2, 3, 1, base);
 		AddBone(vmdMotion, vmdMotionOut, f, fi, L"右ひじ", 3, 4, 1, rs);
 	}
+#endif
 
 	~ThisApp()
 	{
@@ -275,12 +229,14 @@ public:
 
 		XMMATRIX rot = XMMatrixIdentity();
 		{
-			//float dist = 0.75f;
-			//sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
-			//openPoseRender->Render(frames[cur], sceneDesc);
+			float dist = 0.75f;
+			sceneDesc.Build(hWnd, com + XMFLOAT3(0, -dist, dist), com, rot);
+			openPoseRender->Render(frames[cur], sceneDesc);
 		}
 
 		{
+			mmdPlayer->Update();
+
 			XMFLOAT3 ofs(0, 0, 0);
 			float dist = 5.0f;
 			sceneDesc.Build(
@@ -288,7 +244,7 @@ public:
 				XMFLOAT3(0, 0, 3), 
 				XMFLOAT3(0, 0.5f, 0), 
 				rot);
-			mmdRender->Render(pmdModel.get(), sceneDesc);
+			mmdRender->Render(mmdPlayer.get(), sceneDesc);
 		}
 
 		if (advance)

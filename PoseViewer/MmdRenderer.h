@@ -4,17 +4,14 @@
 
 #include "RenderContext.h"
 #include "SceneDescriptor.h"
-
-#include "OpenPose.h"
-
-#include "Pmd.h"
+#include "MmdPlayer.h"
 
 class IMmdRenderer {
 public:
 	virtual ~IMmdRenderer();
 
 	virtual void Render(
-		const pmd::PmdModel* model,
+		const IMmdPlayer* player,
 		const SceneDescriptor& sceneDesc) = 0;
 
 	static IMmdRenderer* Create(RenderContext* context);

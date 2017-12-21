@@ -53,6 +53,9 @@
     <ClCompile Include="MmdRenderer.cpp">
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClCompile>
+    <ClCompile Include="MmdPlayer.cpp">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -83,6 +86,9 @@
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
     <ClInclude Include="MmdRenderer.h">
+      <Filter>소스 파일\ThisApp\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="MmdPlayer.h">
       <Filter>소스 파일\ThisApp\MMD</Filter>
     </ClInclude>
   </ItemGroup>
