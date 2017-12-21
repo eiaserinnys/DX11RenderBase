@@ -176,8 +176,8 @@ public:
 			ind.push_back((uint16_t)pos.size() + 1);
 			pos.push_back(pivot);
 			pos.push_back(pivot + x * scale);
-			col.push_back(0xffff0000);
-			col.push_back(0xffff0000);
+			col.push_back(0xff0000ff);
+			col.push_back(0xff0000ff);
 
 			ind.push_back((uint16_t)pos.size());
 			ind.push_back((uint16_t)pos.size() + 1);
@@ -190,8 +190,8 @@ public:
 			ind.push_back((uint16_t)pos.size() + 1);
 			pos.push_back(pivot);
 			pos.push_back(pivot + z * scale);
-			col.push_back(0xff0000ff);
-			col.push_back(0xff0000ff);
+			col.push_back(0xffff0000);
+			col.push_back(0xffff0000);
 		}
 
 		this->pos->UpdateDiscard(

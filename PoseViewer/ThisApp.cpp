@@ -103,6 +103,8 @@ public:
 
 				frames.push_back(frame);
 
+				WindowsUtility::Debug(L"%d, %f,%f,%f\n", i, frame.com.x, frame.com.y, frame.com.z);
+
 				com = com + frame.com;
 			}
 			catch (const exception& e)
