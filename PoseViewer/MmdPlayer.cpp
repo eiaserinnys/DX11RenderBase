@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "MmdPlayer.h"
 
+#include <map>
+#include <algorithm>
+
 #include <DirectXMath.h>
 
 #include <WindowsUtility.h>
@@ -21,13 +24,41 @@ public:
 	vector<XMFLOAT3> vertices;
 	vector<uint16_t> indices;
 
+	vector<vector<vmd::VmdBoneFrame>*> frames;
+
+	int pivotTime = 0;
+	int curFrame = 0;
+	int lastFrame = 0;
+
 	const XMFLOAT3* GetVertices() const { return vertices.empty() ? nullptr : &vertices[0]; }
 	int GetVerticesCount() const { return (int) vertices.size(); }
 
 	const uint16_t* GetIndices() const { return indices.empty() ? nullptr : &indices[0]; }
 	int GetIndicesCount() const { return (int)indices.size(); }
 
+	~MmdPlayer()
+	{
+		for (auto& f : frames)
+		{
+			if (f != nullptr)
+			{
+				delete f;
+			}
+		}
+
+		frames.clear();
+	}
+
 	void Load()
+	{
+		LoadPmd();
+
+		LoadVmd();
+
+		LinkAnimation();
+	}
+
+	void LoadPmd()
 	{
 		// PMD를 로드해본다
 		model = pmd::PmdModel::LoadFromFile("MMD/md_m.pmd");
@@ -54,7 +85,10 @@ public:
 				WindowsUtility::Debug(L"\n");
 			}
 		}
+	}
 
+	void LoadVmd()
+	{
 		// VMD를 로드해본다
 		std::ifstream is;
 		is.open("MMD/Happy Hands Meme.vmd", std::ios::in | std::ios::binary);
@@ -80,8 +114,307 @@ public:
 		}
 	}
 
+	static bool VMDMotionSorter(
+		const vmd::VmdBoneFrame& m1, 
+		const vmd::VmdBoneFrame& m2) 
+	{
+		return m1.frame < m2.frame;
+	}
+
+	void LinkAnimation()
+	{
+		// 이름 리스트를 만든다
+		map<string, int> modelBones;
+
+		for (int i = 0; i < model->bones.size(); ++i)
+		{
+			modelBones.insert(make_pair(model->bones[i].name, i));
+		}
+
+		// 애니메이션에서 매칭되는 본에 프레임을 누적한다
+		frames.resize(model->bones.size());
+
+		for (auto& f : motion->bone_frames)
+		{
+			auto it = modelBones.find(f.name);
+			if (it != modelBones.end())
+			{
+				int index = it->second;
+				if (frames[index] == nullptr) 
+				{
+					frames[index] = new vector<vmd::VmdBoneFrame>;
+				}
+
+				frames[index]->push_back(f);
+
+				if (f.frame > lastFrame) { lastFrame = f.frame; }
+			}
+		}
+
+		// 소트한다 -_-
+		for (auto& frame : frames)
+		{
+			if (frame != nullptr)
+			{
+				// Motion data may not be ordererd in frame number. Sort it here.
+				sort(frame->begin(), frame->end(), VMDMotionSorter);
+			}
+		}
+	}
+
+	pair<int, int> FindMotionSegment(
+		int frame,
+		std::vector<vmd::VmdBoneFrame> &motions) 
+	{
+		pair<int, int> ms;
+		ms.first = 0;
+		ms.second = motions.size() - 1;
+
+		if (frame >= motions[ms.second].frame) 
+		{
+			ms.first = ms.second;
+			ms.second = -1;
+			return ms;
+		}
+
+		while (true) 
+		{
+			int middle = (ms.first + ms.second) / 2;
+
+			if (middle == ms.first) 
+			{
+				return ms;
+			}
+
+			if (motions[middle].frame == frame) 
+			{
+				ms.first = middle;
+				ms.second = -1;
+				return ms;
+			}
+			else if (motions[middle].frame > frame) 
+			{
+				ms.second = middle;
+			}
+			else 
+			{
+				ms.first = middle;
+			}
+		}
+	}
+
+	static double BezierEval(unsigned char *ip, float t) 
+	{
+		double xa = ip[0] / 256.0;
+		double xb = ip[2] / 256.0;
+		double ya = ip[1] / 256.0;
+		double yb = ip[3] / 256.0;
+
+		double min = 0;
+		double max = 1;
+
+		double ct = t;
+		while (true) 
+		{
+			double x11 = xa * ct;
+			double x12 = xa + (xb - xa) * ct;
+			double x13 = xb + (1.0 - xb) * ct;
+
+			double x21 = x11 + (x12 - x11) * ct;
+			double x22 = x12 + (x13 - x12) * ct;
+
+			double x3 = x21 + (x22 - x21) * ct;
+
+			if (fabs(x3 - t) < 0.0001)
+			{
+				double y11 = ya * ct;
+				double y12 = ya + (yb - ya) * ct;
+				double y13 = yb + (1.0 - yb) * ct;
+
+				double y21 = y11 + (y12 - y11) * ct;
+				double y22 = y12 + (y13 - y12) * ct;
+
+				double y3 = y21 + (y22 - y21) * ct;
+
+				return y3;
+			}
+			else if (x3 < t) 
+			{
+				min = ct;
+			}
+			else 
+			{
+				max = ct;
+			}
+			ct = min * 0.5 + max * 0.5;
+		}
+	}
+
+	static inline void MyQSlerp(
+		XMFLOAT4& p, 
+		const XMFLOAT4& q,
+		const XMFLOAT4& r,
+		double t) 
+	{
+		double qdotr = q.x * r.x + q.y * r.y + q.z * r.z + q.w * r.w;
+		// Clamp to prevent NaN. But is this OK?
+		if (qdotr > 1.0)
+			qdotr = 1.0;
+		if (qdotr < -1.0)
+			qdotr = -1.0;
+
+		if (qdotr < 0.0) {
+			double theta = acos(-qdotr);
+
+			if (fabs(theta) < 1.0e-10) {
+				p = q;
+				return;
+			}
+
+			double st = sin(theta);
+			double inv_st = 1.0 / st;
+			double c0 = sin((1.0 - t) * theta) * inv_st;
+			double c1 = sin(t * theta) * inv_st;
+
+			p.x = c0 * q.x - c1 * r.x;
+			p.y = c0 * q.y - c1 * r.y;
+			p.z = c0 * q.z - c1 * r.z;
+			p.w = c0 * q.w - c1 * r.w;
+
+		}
+		else {
+
+			double theta = acos(qdotr);
+
+			if (fabs(theta) < 1.0e-10) {
+				p = q;
+				return;
+			}
+
+			double st = sin(theta);
+			double inv_st = 1.0 / st;
+			double c0 = sin((1.0 - t) * theta) * inv_st;
+			double c1 = sin(t * theta) * inv_st;
+
+			p.x = c0 * q.x + c1 * r.x;
+			p.y = c0 * q.y + c1 * r.y;
+			p.z = c0 * q.z + c1 * r.z;
+			p.w = c0 * q.w + c1 * r.w;
+		}
+	}
+
+	static inline void QuatToMatrix(XMMATRIX& m_, const XMFLOAT4 &q)
+	{
+		float* m = (float*) &m_;
+
+		double x2 = q.x * q.x * 2.0f;
+		double y2 = q.y * q.y * 2.0f;
+		double z2 = q.z * q.z * 2.0f;
+		double xy = q.x * q.y * 2.0f;
+		double yz = q.y * q.z * 2.0f;
+		double zx = q.z * q.x * 2.0f;
+		double xw = q.x * q.w * 2.0f;
+		double yw = q.y * q.w * 2.0f;
+		double zw = q.z * q.w * 2.0f;
+
+		m[0] = (float)(1.0f - y2 - z2);
+		m[1] = (float)(xy + zw);
+		m[2] = (float)(zx - yw);
+		m[3] = 0.0f;
+
+		m[4] = (float)(xy - zw);
+		m[5] = (float)(1.0f - z2 - x2);
+		m[6] = (float)(yz + xw);
+		m[7] = 0.0f;
+
+		m[8] = (float)(zx + yw);
+		m[9] = (float)(yz - xw);
+		m[10] = (float)(1.0f - x2 - y2);
+		m[11] = 0.0f;
+
+		m[12] = 0.0f;
+		m[13] = 0.0f;
+		m[14] = 0.0f;
+		m[15] = 1.0f;
+	}
+
+	static void InterpolateMotion(
+		XMFLOAT4& rotation, 
+		float position[3],
+		const std::vector<vmd::VmdBoneFrame> &motions, 
+		const pair<int, int>& ms,
+		float frame) 
+	{
+		if (ms.second == -1)
+		{
+			position[0] = motions[ms.first].position[0];
+			position[1] = motions[ms.first].position[1];
+			position[2] = motions[ms.first].position[2];
+			rotation.x = motions[ms.first].orientation[0];
+			rotation.y = motions[ms.first].orientation[1];
+			rotation.z = motions[ms.first].orientation[2];
+			rotation.w = motions[ms.first].orientation[3];
+		}
+		else 
+		{
+			int diff = motions[ms.second].frame - motions[ms.first].frame;
+			float a0 = frame - motions[ms.first].frame;
+			float ratio = a0 / diff; // [0, 1]
+
+			// Use interpolation parameter
+
+			// http://harigane.at.webry.info/201103/article_1.html
+
+			unsigned char interpX[4];
+			unsigned char interpY[4];
+			unsigned char interpZ[4];
+			unsigned char interpR[4];
+
+			char* interpolation = (char*)(motions[ms.first].interpolation);
+			for (int k = 0; k < 4; k++)
+			{
+				interpX[k] = interpolation[k * 4 + 0];
+				interpY[k] = interpolation[k * 4 + 1];
+				interpZ[k] = interpolation[k * 4 + 2];
+				interpR[k] = interpolation[k * 4 + 3];
+			}
+
+			float tx = BezierEval(interpX, ratio);
+			float ty = BezierEval(interpY, ratio);
+			float tz = BezierEval(interpZ, ratio);
+			float tr = BezierEval(interpR, ratio);
+			position[0] = (1.0 - tx) * motions[ms.first].position[0] + tx * motions[ms.second].position[0];
+			position[1] = (1.0 - ty) * motions[ms.first].position[1] + ty * motions[ms.second].position[1];
+			position[2] = (1.0 - tz) * motions[ms.first].position[2] + tz * motions[ms.second].position[2];
+
+			XMFLOAT4 r0;
+			r0.x = motions[ms.first].orientation[0];
+			r0.y = motions[ms.first].orientation[1];
+			r0.z = motions[ms.first].orientation[2];
+			r0.w = motions[ms.first].orientation[3];
+
+			XMFLOAT4 r1;
+			r1.x = motions[ms.second].orientation[0];
+			r1.y = motions[ms.second].orientation[1];
+			r1.z = motions[ms.second].orientation[2];
+			r1.w = motions[ms.second].orientation[3];
+
+			MyQSlerp(rotation, r0, r1, tr);
+		}
+	}
+
 	void Update()
 	{
+		int frame = 0;
+
+		if (pivotTime == 0) { pivotTime = timeGetTime(); }
+
+		auto elapsedSec = (timeGetTime() - pivotTime) / 1000.0;
+		//frame = (int) (elapsedSec * 10);
+
+		curFrame++;
+		frame = curFrame;
+
 		// 로컬 트랜스폼을 빌드
 		vector<XMMATRIX> localTx;
 		localTx.resize(model->bones.size());
@@ -92,7 +425,7 @@ public:
 
 			localTx[i] = XMMatrixIdentity();
 
-			//if (bone.motions.empty()) 
+			if (frames[i] == nullptr) 
 			{
 				//bone.rotation[0] = 0.0;
 				//bone.rotation[1] = 0.0;
@@ -112,6 +445,31 @@ public:
 					localTx[i].r[3].m128_f32[0] = bone.bone_head_pos[0] - parent.bone_head_pos[0];
 					localTx[i].r[3].m128_f32[1] = bone.bone_head_pos[1] - parent.bone_head_pos[1];
 					localTx[i].r[3].m128_f32[2] = bone.bone_head_pos[2] - parent.bone_head_pos[2];
+				}
+			}
+			else
+			{
+				auto ms = FindMotionSegment(frame, *frames[i]);
+
+				XMFLOAT4 motionRot;
+				float motionPos[3];
+				InterpolateMotion(motionRot, motionPos, *frames[i], ms, frame);
+
+				QuatToMatrix(localTx[i], motionRot);
+
+				if (bone.parent_bone_index == 0xffff)
+				{
+					localTx[i].r[3].m128_f32[0] = bone.bone_head_pos[0] + motionPos[0];
+					localTx[i].r[3].m128_f32[1] = bone.bone_head_pos[1] + motionPos[1];
+					localTx[i].r[3].m128_f32[2] = bone.bone_head_pos[2] + motionPos[2];
+				}
+				else 
+				{
+					auto& parent = model->bones[bone.parent_bone_index];
+
+					localTx[i].r[3].m128_f32[0] = (bone.bone_head_pos[0] - parent.bone_head_pos[0]) + motionPos[0];
+					localTx[i].r[3].m128_f32[1] = (bone.bone_head_pos[1] - parent.bone_head_pos[1]) + motionPos[1];
+					localTx[i].r[3].m128_f32[2] = (bone.bone_head_pos[2] - parent.bone_head_pos[2]) + motionPos[2];
 				}
 			}
 		}
