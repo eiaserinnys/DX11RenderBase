@@ -19,8 +19,10 @@ class IDX11RasterizerState {
 public:
 	virtual ~IDX11RasterizerState();
 	virtual void Apply(ID3D11DeviceContext* devCtx) = 0;
+
 	static IDX11RasterizerState* Create(ID3D11Device* d3dDev, const D3D11_RASTERIZER_DESC& desc);
 
+	static IDX11RasterizerState* Create_Default(ID3D11Device* d3dDev);
 	static IDX11RasterizerState* Create_CullNone(ID3D11Device* d3dDev);
 
 	static void DefaultDesc(D3D11_RASTERIZER_DESC& desc);
@@ -42,9 +44,12 @@ class IDX11DepthStencilState {
 public:
 	virtual ~IDX11DepthStencilState();
 	virtual void Apply(ID3D11DeviceContext* devCtx) = 0;
+	
 	static IDX11DepthStencilState* Create(ID3D11Device* d3dDev, const D3D11_DEPTH_STENCIL_DESC& desc);
 
+	static IDX11DepthStencilState* Create_Default(ID3D11Device* d3dDev);
 	static IDX11DepthStencilState* Create_Disabled(ID3D11Device* d3dDev);
+	static IDX11DepthStencilState* Create_Always(ID3D11Device* d3dDev);
 
 	static void DefaultDesc(D3D11_DEPTH_STENCIL_DESC& depthStencilDesc);
 };

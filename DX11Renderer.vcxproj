@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ArcBall.cpp" />
+    <ClCompile Include="EulerControl.cpp" />
     <ClCompile Include="DX11Buffer.cpp" />
     <ClCompile Include="DX11DepthStencil.cpp" />
     <ClCompile Include="DX11Device.cpp" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArcBall.h" />
+    <ClInclude Include="EulerControl.h" />
     <ClInclude Include="DX11Buffer.h" />
     <ClInclude Include="DX11ConstantBufferT.h" />
     <ClInclude Include="DX11DepthStencil.h" />
@@ -185,6 +187,7 @@
     <ClInclude Include="DX11InputLayout.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="SimpleConstantBuffer.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="WindowsUtility.h" />
   </ItemGroup>

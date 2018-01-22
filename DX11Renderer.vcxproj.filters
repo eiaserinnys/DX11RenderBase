@@ -70,6 +70,9 @@
     <ClCompile Include="ArcBall.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="EulerControl.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -109,6 +112,12 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="ArcBall.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleConstantBuffer.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EulerControl.h">
       <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>

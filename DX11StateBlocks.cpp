@@ -104,6 +104,13 @@ IDX11RasterizerState* IDX11RasterizerState::Create(ID3D11Device* dev, const D3D1
 	return new DX11RasterizerState(dev, desc);
 }
 
+IDX11RasterizerState* IDX11RasterizerState::Create_Default(ID3D11Device* d3dDev)
+{
+	D3D11_RASTERIZER_DESC desc;
+	DefaultDesc(desc);
+	return Create(d3dDev, desc);
+}
+
 IDX11RasterizerState* IDX11RasterizerState::Create_CullNone(ID3D11Device* d3dDev)
 {
 	D3D11_RASTERIZER_DESC desc;
@@ -233,11 +240,26 @@ IDX11DepthStencilState* IDX11DepthStencilState::Create(ID3D11Device* dev, const 
 	return new DX11DepthStencilState(dev, desc);
 }
 
+IDX11DepthStencilState* IDX11DepthStencilState::Create_Default(ID3D11Device* d3dDev)
+{
+	D3D11_DEPTH_STENCIL_DESC desc;
+	DefaultDesc(desc);
+	return Create(d3dDev, desc);
+}
+
 IDX11DepthStencilState* IDX11DepthStencilState::Create_Disabled(ID3D11Device* d3dDev)
 {
 	D3D11_DEPTH_STENCIL_DESC desc;
 	DefaultDesc(desc);
 	desc.DepthEnable = FALSE;
+	return Create(d3dDev, desc);
+}
+
+IDX11DepthStencilState* IDX11DepthStencilState::Create_Always(ID3D11Device* d3dDev)
+{
+	D3D11_DEPTH_STENCIL_DESC desc;
+	DefaultDesc(desc);
+	desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
 	return Create(d3dDev, desc);
 }
 
