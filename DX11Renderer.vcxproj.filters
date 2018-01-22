@@ -35,6 +35,12 @@
     <Filter Include="Manager\Shader">
       <UniqueIdentifier>{5d938815-d4a9-473c-befd-bd68926e7c94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Manager\Texture">
+      <UniqueIdentifier>{4b98a7cc-0ad6-4dff-8989-f13e7f9cbb94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\RenderTarget">
+      <UniqueIdentifier>{32e5b5fe-87eb-4c3c-ab9f-0e5a8ac3e8ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -72,6 +78,9 @@
     </ClCompile>
     <ClCompile Include="EulerControl.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Manager\Texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +128,12 @@
     </ClInclude>
     <ClInclude Include="EulerControl.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Manager\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetManager.h">
+      <Filter>Manager\RenderTarget</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

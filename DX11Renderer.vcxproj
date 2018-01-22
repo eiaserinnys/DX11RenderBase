@@ -172,6 +172,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="WindowsUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -186,8 +187,10 @@
     <ClInclude Include="DX11StateBlocks.h" />
     <ClInclude Include="DX11InputLayout.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RenderTargetManager.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SimpleConstantBuffer.h" />
+    <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="WindowsUtility.h" />
   </ItemGroup>
