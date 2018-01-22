@@ -13,27 +13,8 @@ struct DepthStencil;
 
 class DX11Device {
 public:
-	struct RenderTarget
-	{
-		enum Type
-		{
-			Backbuffer,
-			ForUnwrap,
-			ForUpsample,
-			ForWls,
-		};
-	};
-
 	DX11Device(HWND hwnd);
 	~DX11Device();
-
-	void SetScreenshotMode(RenderTarget::Type rtType);
-
-	void RestoreRenderTarget();
-	void ClearRenderTarget();
-	IDX11RenderTarget* GetRenderTarget();
-	int GetRenderTargetWidth();
-	int GetRenderTargetHeight();
 
 	void SetTexture(int index, ID3D11ShaderResourceView* textureRSView);
 
@@ -42,21 +23,6 @@ public:
 	ID3D11Device*                       g_pd3dDevice = NULL;
 	ID3D11DeviceContext*                immDevCtx = NULL;
 	IDXGISwapChain*                     g_pSwapChain = NULL;
-
-	RenderTarget::Type					rtType = RenderTarget::Backbuffer;
-
-	std::unique_ptr<IDX11RenderTarget>	backBuffer;
-
-	std::unique_ptr<IDX11RenderTarget>	unwrapRT;
-	UINT unwrapWidth = 2048, unwrapHeight = 2048;
-
-	std::unique_ptr<IDX11RenderTarget>	upsampleRT;
-	UINT upsampleWidth = 1920, upsampleHeight = 1080;
-
-	std::unique_ptr<IDX11RenderTarget>	wlsRT;
-	UINT wlsWidth = 1024, wlsHeight = 1024;
-
-	UINT width = 0, height = 0;
 
 	HRESULT hr;
 };

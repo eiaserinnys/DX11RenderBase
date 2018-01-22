@@ -13,6 +13,7 @@ DX11Device::DX11Device(HWND hwnd)
 	hr = S_OK;
 
 	RECT rc;
+	int width, height;
 	{
 		GetClientRect(hwnd, &rc);
 		width = rc.right - rc.left;
@@ -93,24 +94,6 @@ DX11Device::DX11Device(HWND hwnd)
 	}
 #endif
 
-	// Create a render target view
-	backBuffer.reset(IDX11RenderTarget::Create_BackBuffer(g_pd3dDevice, g_pSwapChain));
-
-	// ½ºÅ©¸°¼¦¿ë ·»´õ Å¸°ÙÀ» ¸¸µé¾îµÐ´Ù
-	unwrapRT.reset(IDX11RenderTarget::Create_GenericRenderTarget(
-		g_pd3dDevice, DXGI_FORMAT_B8G8R8A8_UNORM, unwrapWidth, unwrapHeight));
-	assert(unwrapRT.get() != nullptr);
-
-	upsampleRT.reset(IDX11RenderTarget::Create_GenericRenderTarget(
-		g_pd3dDevice, DXGI_FORMAT_R32_FLOAT, upsampleWidth, upsampleHeight));
-	assert(upsampleRT.get() != nullptr);
-
-	wlsRT.reset(IDX11RenderTarget::Create_GenericRenderTarget(
-		g_pd3dDevice, DXGI_FORMAT_R32_FLOAT, wlsWidth, wlsHeight));
-	assert(wlsRT.get() != nullptr);
-
-	RestoreRenderTarget();
-
 	hr = S_OK;
 }
 
@@ -123,115 +106,8 @@ void DX11Device::SetTexture(
 }
 
 //------------------------------------------------------------------------------
-void DX11Device::SetScreenshotMode(RenderTarget::Type rtType_)
-{
-	this->rtType = rtType_;
-}
-
-//------------------------------------------------------------------------------
-void DX11Device::RestoreRenderTarget()
-{
-	D3D11_VIEWPORT vp;
-
-	switch (rtType) {
-	case RenderTarget::ForUnwrap:
-		unwrapRT->SetRenderTarget(immDevCtx);
-		vp.Width = (FLOAT)unwrapRT->GetWidth();
-		vp.Height = (FLOAT)unwrapRT->GetHeight();
-		break;
-
-	case RenderTarget::ForUpsample:
-		upsampleRT->SetRenderTarget(immDevCtx);
-		vp.Width = (FLOAT)upsampleRT->GetWidth();
-		vp.Height = (FLOAT)upsampleRT->GetHeight();
-		break;
-
-	case RenderTarget::ForWls:
-		wlsRT->SetRenderTarget(immDevCtx);
-		vp.Width = (FLOAT)wlsRT->GetWidth();
-		vp.Height = (FLOAT)wlsRT->GetHeight();
-		break;
-
-	default:
-		backBuffer->SetRenderTarget(immDevCtx);
-		vp.Width = (FLOAT)backBuffer->GetWidth();
-		vp.Height = (FLOAT)backBuffer->GetHeight();
-		break;
-	}
-
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	immDevCtx->RSSetViewports(1, &vp);
-}
-
-//------------------------------------------------------------------------------
-void DX11Device::ClearRenderTarget()
-{
-	//float ClearColor[4] = { 0.25f, 0.25f, 0.25f, 0.0f }; // red, green, blue, alpha
-	float ClearColor[4] = { 1, 1, 1, 0.0f }; // red, green, blue, alpha
-
-	switch (rtType) {
-	case RenderTarget::ForUnwrap:
-		unwrapRT->Clear(immDevCtx, ClearColor, 1.0f, 0);
-		break;
-
-	case RenderTarget::ForUpsample:
-		upsampleRT->Clear(immDevCtx, ClearColor, 1.0f, 0);
-		break;
-
-	case RenderTarget::ForWls:
-		wlsRT->Clear(immDevCtx, ClearColor, 1.0f, 0);
-		break;
-
-	default:
-		backBuffer->Clear(immDevCtx, ClearColor, 1.0f, 0);
-		break;
-	}
-}
-
-//------------------------------------------------------------------------------
-IDX11RenderTarget* DX11Device::GetRenderTarget()
-{
-	switch (rtType) {
-	case RenderTarget::ForUnwrap:	return unwrapRT.get();
-	case RenderTarget::ForUpsample:	return upsampleRT.get();
-	case RenderTarget::ForWls:		return wlsRT.get();
-	}
-	return backBuffer.get();
-}
-
-//------------------------------------------------------------------------------
-int DX11Device::GetRenderTargetWidth()
-{
-	switch (rtType) {
-	case RenderTarget::ForUnwrap:	return unwrapRT->GetWidth();
-	case RenderTarget::ForUpsample:	return upsampleRT->GetWidth();
-	case RenderTarget::ForWls:		return wlsRT->GetWidth();
-	default:						return backBuffer->GetWidth();
-	}
-}
-
-//------------------------------------------------------------------------------
-int DX11Device::GetRenderTargetHeight()
-{
-	switch (rtType) {
-	case RenderTarget::ForUnwrap:	return unwrapRT->GetHeight();
-	case RenderTarget::ForUpsample:	return upsampleRT->GetHeight();
-	case RenderTarget::ForWls:		return wlsRT->GetHeight();
-	default:						return backBuffer->GetHeight();
-	}
-}
-
-//------------------------------------------------------------------------------
 DX11Device::~DX11Device()
 {
-	unwrapRT.reset(nullptr);
-	upsampleRT.reset(nullptr);
-	wlsRT.reset(nullptr);
-	backBuffer.reset(nullptr);
-
 	if (g_pSwapChain) g_pSwapChain->Release();
 	if (immDevCtx) immDevCtx->Release();
 	if (g_pd3dDevice) g_pd3dDevice->Release();

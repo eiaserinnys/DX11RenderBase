@@ -82,6 +82,9 @@
     <ClCompile Include="TextureManager.cpp">
       <Filter>Manager\Texture</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTargetManager.cpp">
+      <Filter>Manager\RenderTarget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

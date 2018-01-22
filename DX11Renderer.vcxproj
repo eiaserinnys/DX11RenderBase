@@ -171,6 +171,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="RenderTargetManager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="WindowsUtility.cpp" />
