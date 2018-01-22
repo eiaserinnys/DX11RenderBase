@@ -96,3 +96,27 @@ int WindowsUtility::MessagePump(const function<void()>& functor)
 
 	return (int)msg.wParam;
 }
+
+//------------------------------------------------------------------------------
+LRESULT WindowsUtility::DefaultWndProc(
+	HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message) {
+	case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc;
+
+			hdc = BeginPaint(hWnd, &ps);
+			EndPaint(hWnd, &ps);
+		}
+		return 0;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+}

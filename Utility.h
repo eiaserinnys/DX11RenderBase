@@ -16,7 +16,7 @@ struct Utility
 		char buffer[4096];
 		va_list vaList;
 		va_start(vaList, format);
-		_vsnprintf(buffer, 4096, format, vaList);
+		_vsnprintf_s(buffer, 4096, format, vaList);
 		va_end(vaList);
 
 		return buffer;
@@ -27,7 +27,7 @@ struct Utility
 		wchar_t buffer[4096];
 		va_list vaList;
 		va_start(vaList, format);
-		_vsnwprintf(buffer, 4096, format, vaList);
+		_vsnwprintf_s(buffer, 4096, format, vaList);
 		va_end(vaList);
 
 		return buffer;
