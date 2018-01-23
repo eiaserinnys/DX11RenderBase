@@ -91,6 +91,12 @@
     <ClCompile Include="RenderTargetHelper.cpp">
       <Filter>Wrapper\RenderToTexture\Implementation</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderDefine.cpp">
+      <Filter>Manager\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderDefineManager.cpp">
+      <Filter>Manager\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -155,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="RenderTargetHelper.h">
       <Filter>Wrapper\RenderToTexture\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderDefine.h">
+      <Filter>Manager\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderDefineManager.h">
+      <Filter>Manager\Shader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

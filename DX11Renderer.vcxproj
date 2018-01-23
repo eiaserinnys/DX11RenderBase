@@ -173,6 +173,8 @@
     </ClCompile>
     <ClCompile Include="RenderTargetHelper.cpp" />
     <ClCompile Include="RenderTargetManager.cpp" />
+    <ClCompile Include="ShaderDefine.cpp" />
+    <ClCompile Include="ShaderDefineManager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="WindowsUtility.cpp" />
@@ -194,6 +196,8 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="RenderTargetHelper.h" />
     <ClInclude Include="RenderTargetManager.h" />
+    <ClInclude Include="ShaderDefine.h" />
+    <ClInclude Include="ShaderDefineManager.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SimpleConstantBuffer.h" />
     <ClInclude Include="TextureManager.h" />
