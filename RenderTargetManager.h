@@ -28,6 +28,14 @@ public:
 		int width,
 		int height) = 0;
 
+	virtual void CreateDepthStencilTarget(
+		const std::string& name,
+		DXGI_FORMAT fmt,
+		DXGI_FORMAT dsvFmt,
+		DXGI_FORMAT srvFmt,
+		int width,
+		int height) = 0;
+
 	virtual IDX11RenderTarget* GetRenderTarget(const std::string& name) = 0;
 
 	virtual void ReleaseRenderTarget(const std::string& name) = 0;

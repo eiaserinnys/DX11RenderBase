@@ -70,6 +70,26 @@ public:
 	}
 
 	//--------------------------------------------------------------------------
+	void CreateDepthStencilTarget(
+		const string& name,
+		DXGI_FORMAT fmt,
+		DXGI_FORMAT dsvFmt,
+		DXGI_FORMAT srvFmt,
+		int width,
+		int height)
+	{
+		ReleaseRenderTarget(name);
+
+		auto rt = IDX11RenderTarget::Create_DepthStencilTarget(dev, fmt, dsvFmt, srvFmt, width, height);
+		if (rt == nullptr)
+		{
+			throw runtime_error("No render target created");
+		}
+
+		rts.insert(make_pair(name, rt));
+	}
+
+	//--------------------------------------------------------------------------
 	IDX11RenderTarget* GetRenderTarget(const string& name)
 	{
 		auto it = rts.find(name);
