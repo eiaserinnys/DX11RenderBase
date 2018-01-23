@@ -3,11 +3,14 @@
 #undef new
 #undef delete
 
+#include "DX11Buffer.h"
+#include "ComPtr.h"
+
 template <typename Struct>
 class DX11ConstantBufferT {
 protected:
-	ID3D11Buffer*   cbChangesEveryFrame;
-	Struct			cbChangesEveryFrameMem;
+	Struct cbChangesEveryFrameMem;
+	ComPtrT<ID3D11Buffer> cbChangesEveryFrame;
 
 public:
 	DX11ConstantBufferT(
@@ -27,11 +30,6 @@ public:
 		if (FAILED(hr)) { throw hr; }
 	}
 
-	~DX11ConstantBufferT()
-	{
-		if (cbChangesEveryFrame) { cbChangesEveryFrame->Release(); cbChangesEveryFrame = NULL; }
-	}
-
 	void* operator new(size_t size) { return _aligned_malloc(size, 16); }
 	void operator delete(void* ptr) { return _aligned_free(ptr); }
 
@@ -47,8 +45,9 @@ protected:
 			0,
 			0);
 
-		devCtx->VSSetConstantBuffers(0, 1, &cbChangesEveryFrame);
-		devCtx->GSSetConstantBuffers(0, 1, &cbChangesEveryFrame);
-		devCtx->PSSetConstantBuffers(0, 1, &cbChangesEveryFrame);
+		ID3D11Buffer* buffers[] = { cbChangesEveryFrame };
+		devCtx->VSSetConstantBuffers(0, 1, buffers);
+		devCtx->GSSetConstantBuffers(0, 1, buffers);
+		devCtx->PSSetConstantBuffers(0, 1, buffers);
 	}
 };

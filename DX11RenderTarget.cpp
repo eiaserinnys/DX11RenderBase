@@ -37,9 +37,17 @@ public:
 		assert(depthStencil.get() != nullptr);
 	}
 
-	virtual ID3D11Texture2D* GetTexture() { return pBackBuffer; }
+	virtual ID3D11Texture2D* GetTexture(int index) 
+	{ 
+		assert(index == 0);
+		return pBackBuffer; 
+	}
 
-	virtual ID3D11ShaderResourceView* GetShaderResourceView() { return nullptr; }
+	virtual ID3D11ShaderResourceView* GetShaderResourceView(int index) 
+	{ 
+		assert(index == 0);
+		return nullptr; 
+	}
 
 	virtual int GetWidth() { return desc.Width; }
 	virtual int GetHeight() { return desc.Height; }
@@ -50,13 +58,20 @@ public:
 		ctx->OMSetRenderTargets(1, views, depthStencil->view);
 	}
 
-	virtual void Clear(
+	virtual void ClearRenderTarget(
 		ID3D11DeviceContext* devCtx,
-		const float* color,
+		int index,
+		const float* color)
+	{
+		assert(index == 0);
+		devCtx->ClearRenderTargetView(rtView, color);
+	}
+
+	virtual void ClearDepthStencil(
+		ID3D11DeviceContext* devCtx,
 		float depth,
 		UINT8 stencil)
 	{
-		devCtx->ClearRenderTargetView(rtView, color);
 		devCtx->ClearDepthStencilView(depthStencil->view, D3D11_CLEAR_DEPTH, depth, stencil);
 	}
 
@@ -78,42 +93,87 @@ class DX11GenericRenderTarget : public IDX11RenderTarget {
 public:
 	DX11GenericRenderTarget(
 		ID3D11Device* d3dDev,
-		DXGI_FORMAT fmt,
+		DXGI_FORMAT* formats,
+		int formatCount,
 		UINT width,
 		UINT height)
 		: targetWidth(width), targetHeight(height)
 	{
-		rt.reset(new GenericRenderTarget(d3dDev, fmt, width, height));
+		rt.reserve(formatCount);
+		for (int i = 0; i < formatCount; ++i)
+		{
+			rt.push_back(new GenericRenderTarget(d3dDev, formats[i], width, height));
+		}
 		depthStencil.reset(new DX11DepthStencil(d3dDev, width, height));
 	}
 
-	void Clear(ID3D11DeviceContext* devCtx, const float* color, float depth, UINT8 stencil)
+	void ClearRenderTarget(
+		ID3D11DeviceContext* devCtx,
+		int index,
+		const float* color)
 	{
-		devCtx->ClearRenderTargetView(rt->view, color);
+		assert(index < rt.size());
+		devCtx->ClearRenderTargetView(rt[index]->view, color);
+	}
+
+	void ClearDepthStencil(
+		ID3D11DeviceContext* devCtx,
+		float depth,
+		UINT8 stencil)
+	{
 		devCtx->ClearDepthStencilView(depthStencil->view, D3D11_CLEAR_DEPTH, depth, stencil);
 	}
 
 	void SetRenderTarget(ID3D11DeviceContext* ctx)
 	{ 
-		ID3D11RenderTargetView* views[] = { rt->view };
-		ctx->OMSetRenderTargets(1, views, depthStencil->view);
+		vector<ID3D11RenderTargetView*> views;
+		views.reserve(rt.size());
+
+		for (size_t i = 0; i < rt.size(); ++i)
+		{
+			views.push_back(rt[i]->view);
+		}
+
+		ctx->OMSetRenderTargets(views.size(), &views[0], depthStencil->view);
 	}
 
-	virtual ID3D11ShaderResourceView* GetShaderResourceView() { return rt->srv; }
+	virtual ID3D11ShaderResourceView* GetShaderResourceView(int index) 
+	{ 
+		assert(index < rt.size());
+		return rt[index]->srv; 
+	}
 
-	ID3D11Texture2D* GetTexture() { return rt->texture; }
+	ID3D11Texture2D* GetTexture(int index) 
+	{ 
+		assert(index < rt.size());
+		return rt[index]->texture; 
+	}
 
 	int GetWidth() { return targetWidth; }
 	int GetHeight() { return targetHeight; }
 
 	UINT targetWidth, targetHeight;
-	unique_ptr<GenericRenderTarget> rt;
+	vector<GenericRenderTarget*> rt;
 	unique_ptr<DX11DepthStencil> depthStencil;
 };
 
 IDX11RenderTarget* IDX11RenderTarget::Create_GenericRenderTarget(
-	ID3D11Device* d3dDev, DXGI_FORMAT fmt, int targetWidth, int targetHeight)
-	{ return new DX11GenericRenderTarget(d3dDev, fmt, targetWidth, targetHeight); }
+	ID3D11Device* d3dDev,
+	DXGI_FORMAT fmt,
+	int targetWidth,
+	int targetHeight)
+{
+	DXGI_FORMAT formats[] = { fmt };
+	return new DX11GenericRenderTarget(d3dDev, formats, 1, targetWidth, targetHeight);
+}
+
+IDX11RenderTarget* IDX11RenderTarget::Create_GenericRenderTarget(
+	ID3D11Device* d3dDev, 
+	DXGI_FORMAT* formats, 
+	int formatCount, 
+	int targetWidth, 
+	int targetHeight)
+	{ return new DX11GenericRenderTarget(d3dDev, formats, formatCount, targetWidth, targetHeight); }
 
 ////////////////////////////////////////////////////////////////////////////////
 class DX11DepthStencilTarget : public IDX11RenderTarget {
@@ -129,9 +189,21 @@ public:
 		dst.reset(new DepthStencilTarget(d3dDev, fmt, dsvFmt, srvFmt, width, height));
 	}
 
-	void Clear(ID3D11DeviceContext* devCtx, const float* color, float depth, UINT8 stencil)
+	void ClearRenderTarget(
+		ID3D11DeviceContext* devCtx, 
+		int index, 
+		const float* color)
 	{
-		devCtx->ClearDepthStencilView(dst->dsv, D3D11_CLEAR_DEPTH, depth, stencil);
+		assert(index == 0);
+	}
+
+	void ClearDepthStencil(
+		ID3D11DeviceContext* devCtx,
+		float depth,
+		UINT8 stencil)
+	{
+		devCtx->ClearDepthStencilView(
+			dst->dsv, D3D11_CLEAR_DEPTH, depth, stencil);
 	}
 
 	void SetRenderTarget(ID3D11DeviceContext* ctx)
@@ -140,9 +212,17 @@ public:
 		ctx->OMSetRenderTargets(1, views, dst->dsv);
 	}
 
-	virtual ID3D11ShaderResourceView* GetShaderResourceView() { return dst->srv; }
+	virtual ID3D11ShaderResourceView* GetShaderResourceView(int index)
+	{ 
+		assert(index == 0);
+		return dst->srv; 
+	}
 
-	virtual ID3D11Texture2D* GetTexture() { return dst->texture; }
+	virtual ID3D11Texture2D* GetTexture(int index) 
+	{ 
+		assert(index == 0);
+		return dst->texture;
+	}
 
 	int GetWidth() { return dst->targetWidth; }
 	int GetHeight() { return dst->targetHeight; }

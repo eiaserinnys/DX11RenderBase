@@ -17,7 +17,16 @@ public:
 
 	virtual void CreateGenericRenderTarget(
 		const std::string& name,
-		DXGI_FORMAT fmt, int width, int height) = 0;
+		DXGI_FORMAT fmt, 
+		int width, 
+		int height) = 0;
+
+	virtual void CreateGenericRenderTarget(
+		const std::string& name,
+		DXGI_FORMAT* fmt,
+		int formatCount, 
+		int width,
+		int height) = 0;
 
 	virtual IDX11RenderTarget* GetRenderTarget(const std::string& name) = 0;
 

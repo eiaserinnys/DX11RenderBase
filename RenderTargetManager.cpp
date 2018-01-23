@@ -51,6 +51,25 @@ public:
 	}
 
 	//--------------------------------------------------------------------------
+	void CreateGenericRenderTarget(
+		const string& name,
+		DXGI_FORMAT* fmt,
+		int formatCount,
+		int width,
+		int height)
+	{
+		ReleaseRenderTarget(name);
+
+		auto rt = IDX11RenderTarget::Create_GenericRenderTarget(dev, fmt, formatCount, width, height);
+		if (rt == nullptr)
+		{
+			throw runtime_error("No render target created");
+		}
+
+		rts.insert(make_pair(name, rt));
+	}
+
+	//--------------------------------------------------------------------------
 	IDX11RenderTarget* GetRenderTarget(const string& name)
 	{
 		auto it = rts.find(name);
