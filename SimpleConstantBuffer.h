@@ -6,8 +6,8 @@
 //------------------------------------------------------------------------------
 struct SimpleConstantBody
 {
-	DirectX::XMMATRIX mWorld;
-	DirectX::XMMATRIX viewProj;
+	DirectX::XMMATRIX worldViewProj;
+	DirectX::XMMATRIX invWorldViewT;
 	DirectX::XMFLOAT4 eyePos;
 };
 
@@ -24,13 +24,14 @@ struct SimpleConstant
 
 	void Update(
 		ID3D11DeviceContext* devCtx,
-		const DirectX::XMMATRIX& world, 
-		const DirectX::XMMATRIX& view, 
-		const DirectX::XMMATRIX& proj,
+		const DirectX::XMMATRIX& wvp, 
+		const DirectX::XMMATRIX& invWvT, 
 		const DirectX::XMFLOAT4& eye)
 	{
-		cbChangesEveryFrameMem.mWorld = world;
-		cbChangesEveryFrameMem.viewProj = DirectX::XMMatrixMultiply(proj, view);
+		using namespace DirectX;
+
+		cbChangesEveryFrameMem.worldViewProj = wvp;
+		cbChangesEveryFrameMem.invWorldViewT = invWvT;
 		cbChangesEveryFrameMem.eyePos = eye;
 
 		UpdateInternal(devCtx);
