@@ -41,6 +41,9 @@
     <Filter Include="Manager\RenderTarget">
       <UniqueIdentifier>{32e5b5fe-87eb-4c3c-ab9f-0e5a8ac3e8ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Wrapper\RenderToTexture\Implementation">
+      <UniqueIdentifier>{e402f4dc-7f18-4888-9409-15c4eaa11326}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -84,6 +87,9 @@
     </ClCompile>
     <ClCompile Include="RenderTargetManager.cpp">
       <Filter>Manager\RenderTarget</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTargetHelper.cpp">
+      <Filter>Wrapper\RenderToTexture\Implementation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +146,15 @@
     </ClInclude>
     <ClInclude Include="ComPtr.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilTarget.h">
+      <Filter>Wrapper\RenderToTexture\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="GenericRenderTarget.h">
+      <Filter>Wrapper\RenderToTexture\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetHelper.h">
+      <Filter>Wrapper\RenderToTexture\Implementation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

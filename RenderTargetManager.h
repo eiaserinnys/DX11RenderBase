@@ -7,6 +7,7 @@ public:
 	virtual ~IRenderTargetManager();
 
 	virtual void Restore() = 0;
+	virtual void Restore(const std::string& name) = 0;
 
 	virtual void Clear() = 0;
 
@@ -17,6 +18,10 @@ public:
 	virtual void CreateGenericRenderTarget(
 		const std::string& name,
 		DXGI_FORMAT fmt, int width, int height) = 0;
+
+	virtual IDX11RenderTarget* GetRenderTarget(const std::string& name) = 0;
+
+	virtual void ReleaseRenderTarget(const std::string& name) = 0;
 
 	static IRenderTargetManager* Create(
 		ID3D11Device* dev, 

@@ -15,9 +15,7 @@ public:
 		ID3D11DeviceContext* devCtx)
 		: dev(dev), devCtx(devCtx)
 	{
-		// Create a render target view
 		backBuffer.reset(IDX11RenderTarget::Create_BackBuffer(dev, swapChain));
-
 		SelectBackBuffer();
 	}
 
@@ -26,6 +24,12 @@ public:
 	{
 		SelectBackBuffer();
 		Restore();
+
+		for (auto it = rts.begin(); it != rts.end(); ++it)
+		{
+			delete it->second;
+		}
+		rts.clear();
 	}
 
 	//--------------------------------------------------------------------------
@@ -35,32 +39,81 @@ public:
 		int width, 
 		int height)
 	{
+		ReleaseRenderTarget(name);
 
-	}
-
-	//--------------------------------------------------------------------------
-	void SelectBackBuffer()
-	{
-		curTarget = backBuffer.get();
-	}
-
-	//--------------------------------------------------------------------------
-	void SelectBackBufferIfInvalid()
-	{
-		if (curTarget == nullptr)
+		auto rt = IDX11RenderTarget::Create_GenericRenderTarget(dev, fmt, width, height);
+		if (rt == nullptr)
 		{
-			curTarget = backBuffer.get();
+			throw runtime_error("No render target created");
+		}
+
+		rts.insert(make_pair(name, rt));
+	}
+
+	//--------------------------------------------------------------------------
+	IDX11RenderTarget* GetRenderTarget(const string& name)
+	{
+		auto it = rts.find(name);
+		if (it != rts.end())
+		{
+			return it->second;
+		}
+		return nullptr;
+	}
+
+	//--------------------------------------------------------------------------
+	void ReleaseRenderTarget(const string& name)
+	{
+		auto it = rts.find(name);
+		if (it != rts.end())
+		{
+			if (curTarget == it->second)
+			{
+				SelectBackBuffer();
+			}
+
+			delete it->second;
+
+			rts.erase(it);
 		}
 	}
 
 	//--------------------------------------------------------------------------
+	void SelectBackBuffer()
+	{ curTarget = backBuffer.get(); }
+
+	//--------------------------------------------------------------------------
+	void SelectBackBufferIfInvalid()
+	{ if (curTarget == nullptr) { curTarget = backBuffer.get(); } }
+
+	//--------------------------------------------------------------------------
 	void Restore()
 	{
-		SelectBackBufferIfInvalid();
+		SelectBackBuffer();
+		RestoreInternal();
+	}
+
+	//--------------------------------------------------------------------------
+	void Restore(const string& name)
+	{
+		auto it = rts.find(name);
+		if (it != rts.end())
+		{
+			curTarget = it->second;
+			RestoreInternal();
+		}
+		else
+		{
+			throw runtime_error("The specified render target not found");
+		}
+	}
+
+	//--------------------------------------------------------------------------
+	void RestoreInternal()
+	{
+		curTarget->SetRenderTarget(devCtx);
 
 		D3D11_VIEWPORT vp;
-
-		curTarget->SetRenderTarget(devCtx);
 		vp.Width = (FLOAT)curTarget->GetWidth();
 		vp.Height = (FLOAT)curTarget->GetHeight();
 
@@ -86,7 +139,6 @@ public:
 	IDX11RenderTarget* GetCurrent()
 	{
 		SelectBackBufferIfInvalid();
-
 		return curTarget;
 	}
 
@@ -104,7 +156,9 @@ public:
 		return curTarget->GetHeight();
 	}
 
-	std::unique_ptr<IDX11RenderTarget>	backBuffer;
+	unique_ptr<IDX11RenderTarget> backBuffer;
+
+	map<string, IDX11RenderTarget*> rts;
 
 	IDX11RenderTarget* curTarget = nullptr;
 	ID3D11Device* dev = nullptr;

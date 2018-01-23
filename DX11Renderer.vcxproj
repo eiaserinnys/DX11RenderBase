@@ -171,6 +171,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="RenderTargetHelper.cpp" />
     <ClCompile Include="RenderTargetManager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
@@ -179,6 +180,7 @@
   <ItemGroup>
     <ClInclude Include="ArcBall.h" />
     <ClInclude Include="ComPtr.h" />
+    <ClInclude Include="DepthStencilTarget.h" />
     <ClInclude Include="EulerControl.h" />
     <ClInclude Include="DX11Buffer.h" />
     <ClInclude Include="DX11ConstantBufferT.h" />
@@ -188,7 +190,9 @@
     <ClInclude Include="DX11Shader.h" />
     <ClInclude Include="DX11StateBlocks.h" />
     <ClInclude Include="DX11InputLayout.h" />
+    <ClInclude Include="GenericRenderTarget.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RenderTargetHelper.h" />
     <ClInclude Include="RenderTargetManager.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SimpleConstantBuffer.h" />

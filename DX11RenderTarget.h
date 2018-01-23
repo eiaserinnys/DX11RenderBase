@@ -8,6 +8,8 @@ public:
 
 	virtual ID3D11Texture2D* GetTexture() = 0;
 
+	virtual ID3D11ShaderResourceView* GetShaderResourceView() = 0;
+
 	virtual int GetWidth() = 0;
 	virtual int GetHeight() = 0;
 
