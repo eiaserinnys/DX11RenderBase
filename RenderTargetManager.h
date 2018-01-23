@@ -14,6 +14,10 @@ public:
 	virtual int GetWidth() = 0;
 	virtual int GetHeight() = 0;
 
+	virtual void CreateGenericRenderTarget(
+		const std::string& name,
+		DXGI_FORMAT fmt, int width, int height) = 0;
+
 	static IRenderTargetManager* Create(
 		ID3D11Device* dev, 
 		IDXGISwapChain* swapChain, 

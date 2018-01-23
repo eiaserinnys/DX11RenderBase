@@ -18,7 +18,7 @@ public:
 	{
 		Reset();
 
-		float init = 30 / 180.0f*M_PI;
+		float init = 15 / 180.0f*M_PI;
 		downYawPitch = XMFLOAT2(0, init);
 		curYawPitch = XMFLOAT2(0, init);
 

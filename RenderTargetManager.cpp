@@ -4,6 +4,8 @@
 #include "DX11Device.h"
 #include "DX11RenderTarget.h"
 
+using namespace std;
+
 class RenderTargetManager : public IRenderTargetManager {
 public:
 	//--------------------------------------------------------------------------
@@ -16,6 +18,29 @@ public:
 		// Create a render target view
 		backBuffer.reset(IDX11RenderTarget::Create_BackBuffer(dev, swapChain));
 
+		SelectBackBuffer();
+	}
+
+	//--------------------------------------------------------------------------
+	~RenderTargetManager()
+	{
+		SelectBackBuffer();
+		Restore();
+	}
+
+	//--------------------------------------------------------------------------
+	void CreateGenericRenderTarget(
+		const string& name,
+		DXGI_FORMAT fmt, 
+		int width, 
+		int height)
+	{
+
+	}
+
+	//--------------------------------------------------------------------------
+	void SelectBackBuffer()
+	{
 		curTarget = backBuffer.get();
 	}
 

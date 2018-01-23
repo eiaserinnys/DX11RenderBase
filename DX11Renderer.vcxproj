@@ -178,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArcBall.h" />
+    <ClInclude Include="ComPtr.h" />
     <ClInclude Include="EulerControl.h" />
     <ClInclude Include="DX11Buffer.h" />
     <ClInclude Include="DX11ConstantBufferT.h" />

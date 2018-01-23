@@ -20,11 +20,23 @@ public:
 		UINT8 stencil) = 0;
 
 	// ±âº» ·»´õ Å¸°ÙÀÇ ·¡ÆÛ¸¦ »ý¼ºÇÑ´Ù
-	static IDX11RenderTarget* Create_BackBuffer(ID3D11Device* d3dDev, IDXGISwapChain* swapChain);
+	static IDX11RenderTarget* Create_BackBuffer(
+		ID3D11Device* d3dDev, 
+		IDXGISwapChain* swapChain);
 
-	// ·»´õ Å¸°Ù ºä, ½¦ÀÌ´õ ¸®¼Ò½º ºä, µª½º ½ºÅÙ½ÇÀ» ¸ðµÎ »ý¼ºÇÑ´Ù
-	static IDX11RenderTarget* Create_GenericRenderTarget(ID3D11Device* d3dDev, DXGI_FORMAT fmt, int width, int height);
+	// ·»´õ Å¸°Ù°ú µª½º ½ºÅÙ½ÇÀ» ¸ðµÎ »ý¼ºÇÑ´Ù
+	static IDX11RenderTarget* Create_GenericRenderTarget(
+		ID3D11Device* d3dDev, 
+		DXGI_FORMAT fmt, 
+		int width, 
+		int height);
 
-	// µª½º ½ºÅÙ½Ç ·»´õ Å¸°ÙÀ» »ý¼ºÇÑ´Ù
-	static IDX11RenderTarget* Create_DepthStencilTarget(ID3D11Device* d3dDev, DXGI_FORMAT fmt, DXGI_FORMAT dsvFmt, DXGI_FORMAT srvFmt, int width, int height);
+	// µª½º ·»´õ Å¸°ÙÀ» »ý¼ºÇÑ´Ù (i.e., ±×¸²ÀÚ ·»´õ¸µ)
+	static IDX11RenderTarget* Create_DepthStencilTarget(
+		ID3D11Device* d3dDev, 
+		DXGI_FORMAT fmt, 
+		DXGI_FORMAT dsvFmt, 
+		DXGI_FORMAT srvFmt, 
+		int width, 
+		int height);
 };

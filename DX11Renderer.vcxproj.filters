@@ -138,5 +138,8 @@
     <ClInclude Include="RenderTargetManager.h">
       <Filter>Manager\RenderTarget</Filter>
     </ClInclude>
+    <ClInclude Include="ComPtr.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

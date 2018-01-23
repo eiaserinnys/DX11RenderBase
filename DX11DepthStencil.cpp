@@ -37,9 +37,4 @@ DX11DepthStencil::DX11DepthStencil(ID3D11Device* d3dDev, int width, int height)
 	if (FAILED(hr)) { throw hr; }
 }
 
-DX11DepthStencil::~DX11DepthStencil()
-{
-	if (view != NULL) { view->Release(); view = NULL; }
-	if (texture != NULL) { texture->Release(); texture = NULL; }
-}
 
