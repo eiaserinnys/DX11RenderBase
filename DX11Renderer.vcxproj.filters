@@ -14,9 +14,6 @@
     <Filter Include="Wrapper\Shader">
       <UniqueIdentifier>{012417d5-44ed-4d72-8a82-0111d7f71190}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Wrapper\DepthStencil">
-      <UniqueIdentifier>{698ee602-3448-4aaa-86e0-237d22b60643}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Wrapper\RenderToTexture">
       <UniqueIdentifier>{ad316c43-d475-48f5-9a8a-de53f527cc22}</UniqueIdentifier>
     </Filter>
@@ -43,6 +40,9 @@
     </Filter>
     <Filter Include="Wrapper\RenderToTexture\Implementation">
       <UniqueIdentifier>{e402f4dc-7f18-4888-9409-15c4eaa11326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Wrapper\DepthStencil">
+      <UniqueIdentifier>{698ee602-3448-4aaa-86e0-237d22b60643}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +96,9 @@
     </ClCompile>
     <ClCompile Include="ShaderDefineManager.cpp">
       <Filter>Manager\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRenderer.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +170,9 @@
     </ClInclude>
     <ClInclude Include="ShaderDefineManager.h">
       <Filter>Manager\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="TextRenderer.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

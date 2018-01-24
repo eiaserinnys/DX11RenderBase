@@ -5,7 +5,18 @@
 
 using namespace std;
 
-HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
+//------------------------------------------------------------------------------
+IShaderCompileLog ::~IShaderCompileLog()
+{
+}
+
+//------------------------------------------------------------------------------
+HRESULT CompileShaderFromFile(
+	WCHAR* szFileName, 
+	LPCSTR szEntryPoint, 
+	LPCSTR szShaderModel, 
+	ID3DBlob** ppBlobOut,
+	IShaderCompileLog* log = nullptr)
 {
 	HRESULT hr = S_OK;
 
@@ -18,7 +29,7 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 	dwShaderFlags |= D3DCOMPILE_DEBUG;
 #endif
 
-	ID3DBlob* pErrorBlob = nullptr;
+	ComPtrT<ID3DBlob> pErrorBlob;
 	hr = D3DCompileFromFile(
 		szFileName,
 		NULL,
@@ -32,43 +43,53 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 	if (FAILED(hr))
 	{
 		if (pErrorBlob != NULL)
+		{
 			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-		if (pErrorBlob) pErrorBlob->Release();
+
+			if (log != nullptr)
+			{
+				log->Log((char*)pErrorBlob->GetBufferPointer());
+			}
+		}
 		return hr;
 	}
-	if (pErrorBlob) pErrorBlob->Release();
 
 	return S_OK;
 }
 
-DX11VertexShader::DX11VertexShader(ID3D11Device* d3ddev, const wstring& filename)
+//------------------------------------------------------------------------------
+DX11VertexShader::DX11VertexShader(
+	ID3D11Device* d3ddev, 
+	const wstring& filename,
+	IShaderCompileLog* log)
 	: pVSBlob(NULL)
-	, hr(S_OK)
 	, vs(NULL)
 {
-	Create(d3ddev, filename, "VS");
+	Create(d3ddev, filename, "VS", log);
 }
 
-DX11VertexShader::DX11VertexShader(ID3D11Device* d3ddev, const wstring& filename, const string& entry)
+//------------------------------------------------------------------------------
+DX11VertexShader::DX11VertexShader(
+	ID3D11Device* d3ddev, 
+	const wstring& filename, 
+	const string& entry,
+	IShaderCompileLog* log)
 	: pVSBlob(NULL)
-	, hr(S_OK)
 	, vs(NULL)
 {
-	Create(d3ddev, filename, entry);
+	Create(d3ddev, filename, entry, log);
 }
 
-void DX11VertexShader::Create(ID3D11Device* d3ddev, const wstring& filename, const string& entry)
+//------------------------------------------------------------------------------
+void DX11VertexShader::Create(
+	ID3D11Device* d3ddev, 
+	const wstring& filename, 
+	const string& entry,
+	IShaderCompileLog* log)
 {
-	HRESULT hr;
-
 	// Compile the vertex shader
-	hr = CompileShaderFromFile((WCHAR*)filename.c_str(), entry.c_str(), "vs_5_0", &pVSBlob);
-	if (FAILED(hr))
-	{
-		MessageBox(NULL,
-			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		throw hr;
-	}
+	HRESULT hr = CompileShaderFromFile((WCHAR*)filename.c_str(), entry.c_str(), "vs_5_0", &pVSBlob, log);
+	if (FAILED(hr)) { throw hr; }
 
 	// Create the vertex shader
 	hr = d3ddev->CreateVertexShader(
@@ -76,45 +97,41 @@ void DX11VertexShader::Create(ID3D11Device* d3ddev, const wstring& filename, con
 		pVSBlob->GetBufferSize(),
 		NULL,
 		&vs);
-	if (FAILED(hr))
-	{
-		pVSBlob->Release();
-		pVSBlob = NULL;
-		throw hr;
-	}
+	if (FAILED(hr)) { throw hr; }
 }
 
-DX11VertexShader::~DX11VertexShader()
+//------------------------------------------------------------------------------
+DX11PixelShader::DX11PixelShader(
+	ID3D11Device* d3ddev, 
+	const wstring& filename,
+	IShaderCompileLog* log)
+	: ps(NULL)
 {
-	if (pVSBlob != NULL) { pVSBlob->Release(); pVSBlob = NULL; }
-	if (vs != NULL) { vs->Release(); vs = NULL; }
+	Create(d3ddev, filename, "PS", log);
 }
 
-DX11PixelShader::DX11PixelShader(ID3D11Device* d3ddev, const wstring& filename)
-	: hr(S_OK)
-	, ps(NULL)
+//------------------------------------------------------------------------------
+DX11PixelShader::DX11PixelShader(
+	ID3D11Device* d3ddev, 
+	const wstring& filename, 
+	const string& entry,
+	IShaderCompileLog* log)
+	: ps(NULL)
 {
-	Create(d3ddev, filename, "PS");
+	Create(d3ddev, filename, entry, log);
 }
 
-DX11PixelShader::DX11PixelShader(ID3D11Device* d3ddev, const wstring& filename, const string& entry)
-	: hr(S_OK)
-	, ps(NULL)
-{
-	Create(d3ddev, filename, entry);
-}
-
-void DX11PixelShader::Create(ID3D11Device* d3ddev, const wstring& filename, const string& entry)
+//------------------------------------------------------------------------------
+void DX11PixelShader::Create(
+	ID3D11Device* d3ddev, 
+	const wstring& filename, 
+	const string& entry,
+	IShaderCompileLog* log)
 {
 	// Compile the pixel shader
-	ID3DBlob* pPSBlob = NULL;
-	hr = CompileShaderFromFile((WCHAR*)filename.c_str(), entry.c_str(), "ps_5_0", &pPSBlob);
-	if (FAILED(hr))
-	{
-		MessageBox(NULL,
-			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		throw hr;
-	}
+	ComPtrT<ID3DBlob> pPSBlob;
+	HRESULT hr = CompileShaderFromFile((WCHAR*)filename.c_str(), entry.c_str(), "ps_5_0", &pPSBlob, log);
+	if (FAILED(hr)) { throw hr; }
 
 	// Create the pixel shader
 	hr = d3ddev->CreatePixelShader(
@@ -122,26 +139,16 @@ void DX11PixelShader::Create(ID3D11Device* d3ddev, const wstring& filename, cons
 		pPSBlob->GetBufferSize(),
 		NULL,
 		&ps);
-	pPSBlob->Release();
-	pPSBlob = NULL;
-	if (FAILED(hr))
-	{
-		throw hr;
-	}
+	if (FAILED(hr)) { throw hr; }
 }
 
-DX11PixelShader::~DX11PixelShader()
-{
-	if (ps != NULL) { ps->Release(); ps = NULL; }
-}
-
+//------------------------------------------------------------------------------
 DX11ComputeShader::DX11ComputeShader(ID3D11Device* d3ddev, const wstring& filename)
-	: hr(S_OK)
-	, cs(NULL)
+	: cs(NULL)
 {
 	// Compile the Compute shader
-	ID3DBlob* pCSBlob = NULL;
-	hr = CompileShaderFromFile((WCHAR*)filename.c_str(), "CS", "cs_4_0", &pCSBlob);
+	ComPtrT<ID3DBlob> pCSBlob;
+	HRESULT hr = CompileShaderFromFile((WCHAR*)filename.c_str(), "CS", "cs_4_0", &pCSBlob);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL,
@@ -155,47 +162,33 @@ DX11ComputeShader::DX11ComputeShader(ID3D11Device* d3ddev, const wstring& filena
 		pCSBlob->GetBufferSize(),
 		NULL,
 		&cs);
-	pCSBlob->Release();
-	pCSBlob = NULL;
-	if (FAILED(hr))
-	{
-		throw hr;
-	}
+	if (FAILED(hr)) { throw hr; }
 }
 
-DX11ComputeShader::~DX11ComputeShader()
-{
-	if (cs != NULL) { cs->Release(); cs = NULL; }
-}
-
+//------------------------------------------------------------------------------
 DX11GeometryShader::DX11GeometryShader(
 	ID3D11Device* d3ddev,
 	const wstring& filename,
 	D3D11_SO_DECLARATION_ENTRY* entry,
 	UINT entrySize)
-	: hr(S_OK)
-	, gs(NULL)
+	: gs(NULL)
 {
 	Create(d3ddev, filename, "GS", entry, entrySize);
 }
 
+//------------------------------------------------------------------------------
 DX11GeometryShader::DX11GeometryShader(
 	ID3D11Device* d3ddev,
 	const wstring& filename,
 	const string& entryName,
 	D3D11_SO_DECLARATION_ENTRY* entry,
 	UINT entrySize)
-	: hr(S_OK)
-	, gs(NULL)
+	: gs(NULL)
 {
 	Create(d3ddev, filename, entryName, entry, entrySize);
 }
 
-DX11GeometryShader::~DX11GeometryShader()
-{
-	if (gs != NULL) { gs->Release(); gs = NULL; }
-}
-
+//------------------------------------------------------------------------------
 void DX11GeometryShader::Create(
 	ID3D11Device* d3ddev,
 	const wstring& filename,
@@ -204,8 +197,8 @@ void DX11GeometryShader::Create(
 	UINT entrySize)
 {
 	// Compile the Geometry shader
-	ID3DBlob* pCSBlob = NULL;
-	hr = CompileShaderFromFile((WCHAR*)filename.c_str(), entryName.c_str(), "gs_4_0", &pCSBlob);
+	ComPtrT<ID3DBlob> pCSBlob;
+	HRESULT hr = CompileShaderFromFile((WCHAR*)filename.c_str(), entryName.c_str(), "gs_4_0", &pCSBlob);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL,
@@ -224,10 +217,5 @@ void DX11GeometryShader::Create(
 		0,
 		NULL,
 		&gs);
-	pCSBlob->Release();
-	pCSBlob = NULL;
-	if (FAILED(hr))
-	{
-		throw hr;
-	}
+	if (FAILED(hr)) { throw hr; }
 }

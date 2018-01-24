@@ -6,20 +6,22 @@
 using namespace std;
 
 ShaderDefine::ShaderDefine(
+	const string& key, 
 	ID3D11Device* dev,
 	IVertexShaderManager* vs,
 	IPixelShaderManager* ps,
 	const std::wstring& fileName,
 	D3D11_INPUT_ELEMENT_DESC* layout,
-	UINT layoutCount)
-	: fxFileName(fileName)
+	UINT layoutCount,
+	IShaderCompileLog* log)
+	: key(key)
 {
-	vs->Load(fxFileName);
-	ps->Load(fxFileName);
+	vs->Load(key, fileName, "VS", log);
+	ps->Load(key, fileName, "PS", log);
 	
 	if (layout != nullptr && layoutCount > 0)
 	{
-		auto vs_ = vs->Find(fxFileName);
+		auto vs_ = vs->Find(key);
 
 		if (vs_ != nullptr)
 		{
@@ -39,7 +41,7 @@ void ShaderDefine::Set(
 		vertexLayout->Apply(devCtx);
 	}
 
-	vs->Set(fxFileName);
-	ps->Set(fxFileName);
+	vs->Set(key);
+	ps->Set(key);
 }
 

@@ -17,18 +17,29 @@ using namespace std;
 //------------------------------------------------------------------------------
 template <typename BaseType, typename ContentType>
 class ShaderManagerT : public BaseType {
+protected:
+	struct ContentDesc
+	{
+		wstring pathName;
+		string entry;
+		unique_ptr<ContentType> shader;
+	};
+
 public:
+	//--------------------------------------------------------------------------
 	ShaderManagerT(DX11Device* device)
 		: device(device)
 	{
 		assert(device != nullptr);
 	}
 
+	//--------------------------------------------------------------------------
 	~ShaderManagerT()
 	{
 		CleanUp();
 	}
 
+	//--------------------------------------------------------------------------
 	void CleanUp()
 	{
 		for (auto c : contents)
@@ -42,31 +53,49 @@ public:
 		contents.clear();
 	}
 
-	bool Load(const wstring& pathName, const string& entry, bool force)
+	//--------------------------------------------------------------------------
+	bool Load(
+		const string& key, 
+		const wstring& pathName, 
+		const string& entry, 
+		IShaderCompileLog* log, 
+		bool force)
 	{
-		auto prev = contents.find(pathName);
+		ContentDesc* desc = nullptr;
+
+		auto prev = contents.find(key);
 		if (prev != contents.end())
 		{
 			// 이미 로드되어 있는 항목이다
 			// 강제 리로드가 아니면 리턴하자
 			if (!force) { return prev->second != nullptr; }
+
+			desc = prev->second;
+		}
+		else
+		{
+			desc = new ContentDesc;
+			desc->pathName = pathName;
+			desc->entry = entry;
+
+			contents.insert(make_pair(key, desc));
 		}
 
+		return LoadByDesc(desc, log);
+	}
+
+	//--------------------------------------------------------------------------
+	bool LoadByDesc(ContentDesc* desc, IShaderCompileLog* log)
+	{
 		try
 		{
 			auto content = new ContentType(
 				device->g_pd3dDevice,
-				pathName, 
-				entry);
+				desc->pathName,
+				desc->entry,
+				log);
 
-			// 기존 항목이 있으면 날리고
-			if (prev != contents.end())
-			{
-				if (!prev->second) { delete prev->second; }
-				contents.erase(prev);
-			}
-
-			contents.insert(make_pair(pathName, content));
+			desc->shader.reset(content);
 		}
 		catch (...)
 		{
@@ -76,10 +105,20 @@ public:
 		return true;
 	}
 
-	ContentType* Find(const wstring& pathName)
+	//--------------------------------------------------------------------------
+	void Reload(IShaderCompileLog* log)
 	{
-		auto found = contents.find(pathName);
-		if (found != contents.end()) { return found->second; }
+		for (auto it = contents.begin(); it != contents.end(); ++it)
+		{
+			LoadByDesc(it->second, log);
+		}
+	}
+
+	//--------------------------------------------------------------------------
+	ContentType* Find(const string& key)
+	{
+		auto found = contents.find(key);
+		if (found != contents.end()) { return found->second->shader.get(); }
 		return nullptr;
 	}
 
@@ -87,7 +126,7 @@ protected:
 	DX11Device* device = nullptr;
 
 private:
-	map<wstring, ContentType*>  contents;
+	map<string, ContentDesc*>  contents;
 };
 
 //------------------------------------------------------------------------------
@@ -98,9 +137,9 @@ public:
 
 	VertexShaderManager(DX11Device* device) : ParentType(device) {}
 
-	void Set(const wstring& pathName)
+	void Set(const string& key)
 	{
-		auto found = Find(pathName);
+		auto found = Find(key);
 
 		if (found != nullptr)
 		{ 
@@ -112,9 +151,9 @@ public:
 		}
 	}
 
-	virtual DX11VertexShader* Find(const std::wstring& pathName)
+	virtual DX11VertexShader* Find(const string& key)
 	{
-		return ParentType::Find(pathName);
+		return ParentType::Find(key);
 	}
 };
 
@@ -132,9 +171,9 @@ public:
 
 	PixelShaderManager(DX11Device* device) : ParentType(device) {}
 
-	void Set(const wstring& pathName)
+	void Set(const string& key)
 	{
-		auto found = Find(pathName);
+		auto found = Find(key);
 
 		if (found != nullptr)
 		{

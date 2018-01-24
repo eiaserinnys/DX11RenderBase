@@ -45,14 +45,22 @@ public:
 		Release(key);
 
 		auto sd = new ShaderDefine(
+			key, 
 			device->g_pd3dDevice,
 			vs.get(),
 			ps.get(),
 			fileName,
 			layout,
-			layoutCount);
+			layoutCount, 
+			logger);
 
 		sds.insert(make_pair(key, sd));
+	}
+
+	void Reload()
+	{
+		vs->Reload(logger);
+		ps->Reload(logger);
 	}
 
 	void Set(const string& key)
@@ -64,11 +72,17 @@ public:
 		}
 	}
 
+	void SetCompileLogger(IShaderCompileLog* log)
+	{
+		logger = log;
+	}
+
 private:
 	DX11Device* device;
 	unique_ptr<IVertexShaderManager> vs;
 	unique_ptr<IPixelShaderManager> ps;
 	map<string, ShaderDefine*> sds;
+	IShaderCompileLog* logger;
 };
 
 IShaderDefineManager::~IShaderDefineManager()

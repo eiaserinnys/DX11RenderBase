@@ -176,6 +176,7 @@
     <ClCompile Include="ShaderDefine.cpp" />
     <ClCompile Include="ShaderDefineManager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="WindowsUtility.cpp" />
   </ItemGroup>
@@ -200,6 +201,7 @@
     <ClInclude Include="ShaderDefineManager.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SimpleConstantBuffer.h" />
+    <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="WindowsUtility.h" />

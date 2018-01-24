@@ -9,12 +9,14 @@
 struct ShaderDefine
 {
 	ShaderDefine(
+		const std::string& key, 
 		ID3D11Device* dev,
 		IVertexShaderManager* vs,
 		IPixelShaderManager* ps,
 		const std::wstring& fileName,
 		D3D11_INPUT_ELEMENT_DESC* layout,
-		UINT layoutCount);
+		UINT layoutCount,
+		IShaderCompileLog* log);
 
 	void Set(
 		ID3D11DeviceContext* devCtx,
@@ -23,5 +25,5 @@ struct ShaderDefine
 
 	std::unique_ptr<IDX11InputLayout> vertexLayout;
 
-	std::wstring fxFileName;
+	std::string key;
 };
