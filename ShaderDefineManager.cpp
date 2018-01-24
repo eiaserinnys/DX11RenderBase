@@ -63,12 +63,12 @@ public:
 		ps->Reload(logger);
 	}
 
-	void Set(const string& key)
+	bool Set(const string& key)
 	{
 		auto it = sds.find(key);
 		if (it != sds.end())
 		{
-			it->second->Set(device->immDevCtx, vs.get(), ps.get());
+			return it->second->Set(device->immDevCtx, vs.get(), ps.get());
 		}
 	}
 

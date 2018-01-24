@@ -16,7 +16,7 @@ public:
 		D3D11_INPUT_ELEMENT_DESC* layout,
 		UINT layoutCount) = 0; 
 
-	virtual void Set(const std::string& key) = 0;
+	virtual bool Set(const std::string& key) = 0;
 
 	virtual void Reload() = 0;
 

@@ -18,7 +18,7 @@ struct ShaderDefine
 		UINT layoutCount,
 		IShaderCompileLog* log);
 
-	void Set(
+	bool Set(
 		ID3D11DeviceContext* devCtx,
 		IVertexShaderManager* vs,
 		IPixelShaderManager* ps);

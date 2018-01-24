@@ -58,8 +58,8 @@ public:
 		const string& key, 
 		const wstring& pathName, 
 		const string& entry, 
-		IShaderCompileLog* log, 
-		bool force)
+		bool force, 
+		IShaderCompileLog* log)
 	{
 		ContentDesc* desc = nullptr;
 
@@ -137,17 +137,19 @@ public:
 
 	VertexShaderManager(DX11Device* device) : ParentType(device) {}
 
-	void Set(const string& key)
+	bool Set(const string& key)
 	{
 		auto found = Find(key);
 
 		if (found != nullptr)
 		{ 
 			device->immDevCtx->VSSetShader(found->vs, NULL, 0);
+			return true;
 		}
 		else
 		{
 			device->immDevCtx->VSSetShader(NULL, NULL, 0);
+			return false;
 		}
 	}
 
@@ -156,9 +158,6 @@ public:
 		return ParentType::Find(key);
 	}
 };
-
-IVertexShaderManager::~IVertexShaderManager()
-{}
 
 IVertexShaderManager* IVertexShaderManager::Create(DX11Device* device)
 { return new VertexShaderManager(device); }
@@ -171,23 +170,22 @@ public:
 
 	PixelShaderManager(DX11Device* device) : ParentType(device) {}
 
-	void Set(const string& key)
+	bool Set(const string& key)
 	{
 		auto found = Find(key);
 
 		if (found != nullptr)
 		{
 			device->immDevCtx->PSSetShader(found->ps, NULL, 0);
+			return true;
 		}
 		else
 		{
 			device->immDevCtx->PSSetShader(NULL, NULL, 0);
+			return false;
 		}
 	}
 };
-
-IPixelShaderManager::~IPixelShaderManager()
-{}
 
 IPixelShaderManager* IPixelShaderManager::Create(DX11Device* device)
 { return new PixelShaderManager(device); }

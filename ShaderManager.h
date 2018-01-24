@@ -4,42 +4,34 @@
 
 class DX11Device;
 class DX11VertexShader;
+class DX11PixelShader;
 class IShaderCompileLog;
 
-class IVertexShaderManager {
+template <typename ShaderType>
+class IShaderManagerT {
 public:
-	virtual ~IVertexShaderManager();
+	virtual ~IShaderManagerT() {}
 
 	virtual bool Load(
 		const std::string& key,
 		const std::wstring& pathName,
-		const std::string& entryName = "VS",
-		IShaderCompileLog* log = nullptr, 
-		bool force = false) = 0;
+		const std::string& entryName,
+		bool force,
+		IShaderCompileLog* log) = 0;
 
-	virtual void Set(const std::string& key) = 0;
+	virtual bool Set(const std::string& key) = 0;
 
-	virtual DX11VertexShader* Find(const std::string& key) = 0;
+	virtual ShaderType* Find(const std::string& key) = 0;
 
 	virtual void Reload(IShaderCompileLog* log = nullptr) = 0;
-	
+};
+
+class IVertexShaderManager : public IShaderManagerT<DX11VertexShader> {
+public:	
 	static IVertexShaderManager* Create(DX11Device* device);
 };
 
-class IPixelShaderManager {
+class IPixelShaderManager : public IShaderManagerT<DX11PixelShader> {
 public:
-	virtual ~IPixelShaderManager();
-
-	virtual bool Load(
-		const std::string& key, 
-		const std::wstring& pathName,
-		const std::string& entryName = "PS",
-		IShaderCompileLog* log = nullptr,
-		bool force = false) = 0;
-
-	virtual void Set(const std::string& key) = 0;
-
-	virtual void Reload(IShaderCompileLog* log = nullptr) = 0;
-
 	static IPixelShaderManager* Create(DX11Device* device);
 };

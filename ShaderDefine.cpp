@@ -16,8 +16,8 @@ ShaderDefine::ShaderDefine(
 	IShaderCompileLog* log)
 	: key(key)
 {
-	vs->Load(key, fileName, "VS", log);
-	ps->Load(key, fileName, "PS", log);
+	vs->Load(key, fileName, "VS", false, log);
+	ps->Load(key, fileName, "PS", false, log);
 	
 	if (layout != nullptr && layoutCount > 0)
 	{
@@ -31,7 +31,7 @@ ShaderDefine::ShaderDefine(
 	}
 }
 
-void ShaderDefine::Set(
+bool ShaderDefine::Set(
 	ID3D11DeviceContext* devCtx,
 	IVertexShaderManager* vs,
 	IPixelShaderManager* ps)
@@ -41,7 +41,9 @@ void ShaderDefine::Set(
 		vertexLayout->Apply(devCtx);
 	}
 
-	vs->Set(key);
-	ps->Set(key);
+	if (!vs->Set(key)) { return false; }
+	if (!ps->Set(key)) { return false; }
+
+	return true;
 }
 
