@@ -13,5 +13,5 @@ public:
 	virtual const DirectX::XMFLOAT3& GetEyePosition() const = 0;
 	virtual const DirectX::XMMATRIX& GetRotationMatrix() const = 0;
 
-	static IEulerControl* Create();
+	static IEulerControl* Create(float yaw, float pitch);
 };

@@ -14,13 +14,11 @@ using namespace DirectX;
 class EulerControl : public IEulerControl
 {
 public:
-	EulerControl()
+	EulerControl(float yaw, float pitch)
 	{
 		Reset();
 
-		float init = 15 / 180.0f*M_PI;
-		downYawPitch = XMFLOAT2(0, init);
-		curYawPitch = XMFLOAT2(0, init);
+		curYawPitch = downYawPitch = XMFLOAT2(yaw, pitch);
 
 		downPt = XMFLOAT2(0, 0);
 		curPt = XMFLOAT2(0, 0);
@@ -178,5 +176,5 @@ protected:
 IEulerControl::~IEulerControl()
 {}
 
-IEulerControl* IEulerControl::Create()
-{ return new EulerControl(); }
+IEulerControl* IEulerControl::Create(float yaw, float pitch)
+{ return new EulerControl(yaw, pitch); }
