@@ -11,6 +11,7 @@ public:
 
 	static void DefaultDesc(D3D11_SAMPLER_DESC& desc);
 
+	static IDX11SamplerState* Create_Default(ID3D11Device* d3dDev);
 	static IDX11SamplerState* Create_LinearNoMipWrap(ID3D11Device* d3dDev);
 	static IDX11SamplerState* Create_LinearNoMipClamp(ID3D11Device* d3dDev);
 };
@@ -34,6 +35,7 @@ public:
 	virtual void Apply(ID3D11DeviceContext* devCtx) = 0;
 	static IDX11BlendState* Create(ID3D11Device* d3dDev, const D3D11_BLEND_DESC& desc);
 
+	static IDX11BlendState* Create_Default(ID3D11Device* d3dDev);
 	static IDX11BlendState* Create_AlphaBlend(ID3D11Device* d3dDev);
 	static IDX11BlendState* Create_Preserve(ID3D11Device* d3dDev);
 

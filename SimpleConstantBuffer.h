@@ -30,9 +30,9 @@ struct SimpleConstant
 	{
 		using namespace DirectX;
 
-		cbChangesEveryFrameMem.worldViewProj = wvp;
-		cbChangesEveryFrameMem.invWorldViewT = invWvT;
-		cbChangesEveryFrameMem.eyePos = eye;
+		changing.worldViewProj = wvp;
+		changing.invWorldViewT = invWvT;
+		changing.eyePos = eye;
 
 		UpdateInternal(devCtx);
 	}

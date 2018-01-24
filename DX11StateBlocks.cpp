@@ -31,6 +31,13 @@ IDX11SamplerState* IDX11SamplerState::Create(ID3D11Device* dev, const D3D11_SAMP
 	return new DX11SamplerState(dev, desc);
 }
 
+IDX11SamplerState* IDX11SamplerState::Create_Default(ID3D11Device* d3dDev)
+{
+	D3D11_SAMPLER_DESC desc;
+	DefaultDesc(desc);
+	return IDX11SamplerState::Create(d3dDev, desc);
+}
+
 IDX11SamplerState* IDX11SamplerState::Create_LinearNoMipWrap(ID3D11Device* d3dDev)
 {
 	D3D11_SAMPLER_DESC desc;
@@ -163,6 +170,13 @@ IDX11BlendState::~IDX11BlendState() {}
 IDX11BlendState* IDX11BlendState::Create(ID3D11Device* dev, const D3D11_BLEND_DESC& desc)
 {
 	return new DX11BlendState(dev, desc);
+}
+
+IDX11BlendState* IDX11BlendState::Create_Default(ID3D11Device* d3dDev)
+{
+	D3D11_BLEND_DESC desc;
+	DefaultDesc(desc);
+	return IDX11BlendState::Create(d3dDev, desc);
 }
 
 IDX11BlendState* IDX11BlendState::Create_Preserve(ID3D11Device* d3dDev)
