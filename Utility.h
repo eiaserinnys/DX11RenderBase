@@ -118,6 +118,12 @@ namespace DirectX
 	}
 
 	//------------------------------------------------------------------------------
+	inline float Dot(const XMFLOAT2& a, const XMFLOAT2& b)
+	{
+		return a.x * b.x + a.y * b.y;
+	}
+
+	//------------------------------------------------------------------------------
 	inline XMFLOAT3 Cross(const XMFLOAT3& a, const XMFLOAT3& b)
 	{
 		XMFLOAT3 v;
@@ -147,6 +153,12 @@ namespace DirectX
 
 	//------------------------------------------------------------------------------
 	inline float Length(const XMFLOAT3& a)
+	{
+		return sqrtf(Dot(a, a));
+	}
+
+	//------------------------------------------------------------------------------
+	inline float Length(const XMFLOAT2& a)
 	{
 		return sqrtf(Dot(a, a));
 	}
