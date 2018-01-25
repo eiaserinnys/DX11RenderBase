@@ -105,11 +105,4 @@ void DX11Device::SetTexture(
 	immDevCtx->PSSetShaderResources(index, 1, &textureRSView);
 }
 
-//------------------------------------------------------------------------------
-DX11Device::~DX11Device()
-{
-	if (g_pSwapChain) g_pSwapChain->Release();
-	if (immDevCtx) immDevCtx->Release();
-	if (g_pd3dDevice) g_pd3dDevice->Release();
-}
 
