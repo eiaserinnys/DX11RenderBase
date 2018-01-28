@@ -163,4 +163,20 @@ namespace DirectX
 		return sqrtf(Dot(a, a));
 	}
 
+	//------------------------------------------------------------------------------
+	inline XMFLOAT3 Transform(const XMFLOAT3& f3i, const XMMATRIX& m)
+	{
+		XMFLOAT3 f3o;
+		XMStoreFloat3(&f3o, XMVector3Transform(XMLoadFloat3(&f3i), m));
+		return f3o;
+	}
+
+	//------------------------------------------------------------------------------
+	inline XMFLOAT3 TransformNormal(const XMFLOAT3& f3i, const XMMATRIX& m)
+	{
+		XMFLOAT3 f3o;
+		XMStoreFloat3(&f3o, XMVector3TransformNormal(XMLoadFloat3(&f3i), m));
+		return f3o;
+	}
+
 };
