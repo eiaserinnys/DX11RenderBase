@@ -56,12 +56,30 @@ namespace DirectX
 	}
 
 	//------------------------------------------------------------------------------
+	inline XMFLOAT2 operator - (const XMFLOAT2& a, const XMFLOAT2& b)
+	{
+		XMFLOAT2 ret;
+		ret.x = (a.x - b.x);
+		ret.y = (a.y - b.y);
+		return ret;
+	}
+
 	inline XMFLOAT3 operator - (const XMFLOAT3& a, const XMFLOAT3& b)
 	{
 		XMFLOAT3 ret;
 		ret.x = (a.x - b.x);
 		ret.y = (a.y - b.y);
 		ret.z = (a.z - b.z);
+		return ret;
+	}
+
+	inline XMFLOAT4 operator - (const XMFLOAT4& a, const XMFLOAT4& b)
+	{
+		XMFLOAT4 ret;
+		ret.x = (a.x - b.x);
+		ret.y = (a.y - b.y);
+		ret.z = (a.z - b.z);
+		ret.w = (a.w - b.w);
 		return ret;
 	}
 
@@ -112,15 +130,21 @@ namespace DirectX
 	}
 
 	//------------------------------------------------------------------------------
+	inline float Dot(const XMFLOAT2& a, const XMFLOAT2& b)
+	{
+		return a.x * b.x + a.y * b.y;
+	}
+
+	//------------------------------------------------------------------------------
 	inline float Dot(const XMFLOAT3& a, const XMFLOAT3& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z;
 	}
 
 	//------------------------------------------------------------------------------
-	inline float Dot(const XMFLOAT2& a, const XMFLOAT2& b)
+	inline float Dot(const XMFLOAT4& a, const XMFLOAT4& b)
 	{
-		return a.x * b.x + a.y * b.y;
+		return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 	}
 
 	//------------------------------------------------------------------------------
@@ -140,28 +164,24 @@ namespace DirectX
 	}
 
 	//------------------------------------------------------------------------------
-	inline float Distance(const XMFLOAT2& a, const XMFLOAT2& b)
-	{
-		return sqrtf(Utility::Square(a.x - b.x) + Utility::Square(a.y - b.y));
-	}
-
-	//------------------------------------------------------------------------------
-	inline float Distance(const XMFLOAT3& a, const XMFLOAT3& b)
-	{
-		return sqrtf(Utility::Square(a.x - b.x) + Utility::Square(a.y - b.y) + Utility::Square(a.z - b.z));
-	}
-
-	//------------------------------------------------------------------------------
-	inline float Length(const XMFLOAT3& a)
-	{
-		return sqrtf(Dot(a, a));
-	}
-
-	//------------------------------------------------------------------------------
 	inline float Length(const XMFLOAT2& a)
-	{
-		return sqrtf(Dot(a, a));
-	}
+	{ return sqrtf(Dot(a, a)); }
+
+	inline float Length(const XMFLOAT3& a)
+	{ return sqrtf(Dot(a, a)); }
+
+	inline float Length(const XMFLOAT4& a)
+	{ return sqrtf(Dot(a, a)); }
+
+	//------------------------------------------------------------------------------
+	inline float Distance(const XMFLOAT2& a, const XMFLOAT2& b)
+	{ return Length(a - b); }
+
+	inline float Distance(const XMFLOAT3& a, const XMFLOAT3& b)
+	{ return Length(a - b); }
+
+	inline float Distance(const XMFLOAT4& a, const XMFLOAT4& b)
+	{ return Length(a - b); }
 
 	//------------------------------------------------------------------------------
 	inline XMFLOAT3 Transform(const XMFLOAT3& f3i, const XMMATRIX& m)
