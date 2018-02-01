@@ -131,21 +131,15 @@ namespace DirectX
 
 	//------------------------------------------------------------------------------
 	inline float Dot(const XMFLOAT2& a, const XMFLOAT2& b)
-	{
-		return a.x * b.x + a.y * b.y;
-	}
+	{ return XMVector2Dot(XMLoadFloat2(&a), XMLoadFloat2(&b)).m128_f32[0]; }
 
 	//------------------------------------------------------------------------------
 	inline float Dot(const XMFLOAT3& a, const XMFLOAT3& b)
-	{
-		return a.x * b.x + a.y * b.y + a.z * b.z;
-	}
+	{ return XMVector3Dot(XMLoadFloat3(&a), XMLoadFloat3(&b)).m128_f32[0]; }
 
 	//------------------------------------------------------------------------------
 	inline float Dot(const XMFLOAT4& a, const XMFLOAT4& b)
-	{
-		return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-	}
+	{ return XMVector4Dot(XMLoadFloat4(&a), XMLoadFloat4(&b)).m128_f32[0]; }
 
 	//------------------------------------------------------------------------------
 	inline XMFLOAT3 Cross(const XMFLOAT3& a, const XMFLOAT3& b)
