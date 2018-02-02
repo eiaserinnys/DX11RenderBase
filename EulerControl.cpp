@@ -76,12 +76,12 @@ public:
 			float yaw = delta.x * (float)M_PI;
 			float pitch = delta.y * (float)M_PI;
 
-			curYawPitch.x = fmodf(downYawPitch.x + yaw, 2 * M_PI);
+			curYawPitch.x = fmodf(downYawPitch.x + yaw, 2 * (float)M_PI);
 			curYawPitch.y = downYawPitch.y + pitch;
 
 			if (curYawPitch.y < 0) { curYawPitch.y = 0; }
 
-			float maxP = 85 / 180.0f * M_PI;
+			float maxP = 85 / 180.0f * (float)M_PI;
 			if (curYawPitch.y > maxP) { curYawPitch.y = maxP; }
 		}
 	}
